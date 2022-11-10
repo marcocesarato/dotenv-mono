@@ -1,6 +1,6 @@
 {
 	"name": "dotenv-mono",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"main": "index.js",
 	"module": "index.js",
 	"private": true,
@@ -62,5 +62,10 @@
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx}": "eslint --fix",
 		"*.{json,md}": "prettier --write"
+	},
+	"types": "./index.d.ts",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/marcocesarato/dotenv-mono.git"
 	}
 }
