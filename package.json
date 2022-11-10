@@ -3,7 +3,6 @@
 	"version": "0.1.0",
 	"main": "index.js",
 	"module": "index.js",
-	"private": true,
 	"description": "This is a package that permit to load a dotenv even from a children applications or packages of a monorepo. It contains also some additionals features like manipulations and save of the changes on the dotenv file.",
 	"keywords": [
 		"monorepo",
