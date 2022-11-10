@@ -48,7 +48,7 @@ This package find up, starting from the current process directory, the first fil
 | 75       | .env.{development,production,test}.local |
 | 50       | .env.local                               |
 | 25       | .env.{development,production,test}       |
-| 0        | .env                                     |
+| 1        | .env                                     |
 
 They can be customized on the constructor `priorities` property, see the example below.
 
