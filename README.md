@@ -17,10 +17,27 @@
 
 #### What is this?
 
-This is a library that permit to load a dotenv even from a children package of a monorepo.
+This is a package that permit to load a dotenv even from a children applications or packages of a monorepo.
 
 It contains also some additionals features like manipulations and save of the changes on the dotenv file.
 The package [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) is enabled by default.
+
+##### Example
+
+```text
+├── .env
+├── packages
+│   ├── my-package
+│   │   ├── index.js
+│   ├── my-package-2
+│   │   ├── index.js
+├── app
+│   ├── nextjs
+│   │   ├── next.config.js
+│   ├── angular
+│   │   ├── src
+│   │   |   ├── environment.ts
+```
 
 #### Priorities
 

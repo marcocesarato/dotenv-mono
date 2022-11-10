@@ -1,8 +1,36 @@
 {
 	"name": "dotenv-mono",
-	"version": "0.1.0",
+	"version": "0.0.0",
 	"main": "index.js",
+	"module": "index.js",
 	"private": true,
+	"description": "This is a package that permit to load a dotenv even from a children applications or packages of a monorepo. It contains also some additionals features like manipulations and save of the changes on the dotenv file.",
+	"keywords": [
+		"monorepo",
+		"dotenv",
+		"dotenv-expand",
+		"load",
+		"loader",
+		"mono",
+		"repo",
+		"changes",
+		"edit",
+		"priorities",
+		"env",
+		"environemnt",
+		"production",
+		"development",
+		"prod",
+		"dev",
+		"apps",
+		"packages"
+	],
+	"author": "Marco Cesarato <cesarato.developer@gmail.com>",
+	"bugs": {
+		"url": "https://github.com/marcocesarato/dotenv/issues"
+	},
+	"homepage": "https://marcocesarato.github.io/dotenv/",
+	"license": "GPL-3.0-or-later",
 	"scripts": {
 		"release": "standard-version",
 		"lint": "eslint --ext .js,.ts .",
@@ -25,6 +53,11 @@
 	},
 	"publishConfig": {
 		"access": "public"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
 	},
 	"lint-staged": {
 		"*.{js,jsx,ts,tsx}": "eslint --fix",
