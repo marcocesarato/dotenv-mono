@@ -4,12 +4,12 @@ const dotenv = require("dotenv");
 const dotenvExpand = require("dotenv-expand");
 
 class DotEnv {
-	constructor({path = null, expand = true, extension = null, priorities = null}) {
-		this.path = path;
-		this.expand = expand;
-		this.ext = extension;
+	constructor(props = {}) {
+		this.path = props.path;
+		this.expand = props.expand ?? false;
+		this.ext = props.extension;
 		this.env = {};
-		this.setPriorities(priorities);
+		this.setPriorities(props.priorities);
 	}
 
 	setPriorities(priorities = {}) {
@@ -20,8 +20,8 @@ class DotEnv {
 			[`.env${ext}.${this.nodeEnv}.local`]: 75,
 			[`.env${ext}.local`]: 50,
 			[`.env${ext}.${this.nodeEnv}`]: 25,
-			[`.env${ext}`]: 0,
-			...(priorities || {}),
+			[`.env${ext}`]: 1,
+			...(priorities ?? {}),
 		};
 
 		return this;
@@ -58,7 +58,7 @@ class DotEnv {
 		const maxDepth = 3;
 		const {root} = path.parse(directory);
 		const matcher = (cwd) => {
-			const priority = 0;
+			const priority = -1;
 			Object.keys(this.priorities).forEach((fileName) => {
 				if (
 					this.priorities[fileName] > priority &&

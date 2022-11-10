@@ -11,7 +11,7 @@ export class DotEnv {
 	public expand: string | null | undefined;
 	public env: Data | null | undefined;
 	public envString: string | null | undefined;
-	constructor(args: DontEnvArgs);
+	constructor(args?: DontEnvArgs);
 	public load(loadOnProcess: boolean): DotEnv;
 	public get(): Data;
 	public find(): string | null;
