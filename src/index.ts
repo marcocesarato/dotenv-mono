@@ -25,7 +25,7 @@ export class Dotenv {
 	public path: string | undefined;
 	public plain: string = "";
 
-	private _cwd: string | undefined;
+	private _cwd: string = "";
 	private _debug: boolean = false;
 	private _depth: number = 4;
 	private _encoding: BufferEncoding = "utf8";
@@ -81,12 +81,12 @@ export class Dotenv {
 	}
 
 	get cwd(): string {
-		if (this._cwd == null) return process.cwd() || "";
+		if (!this._cwd) return process.cwd() ?? "";
 		return this._cwd;
 	}
 
 	set cwd(value: string | undefined) {
-		this._cwd = value;
+		this._cwd = value ?? "";
 	}
 
 	get depth() {
