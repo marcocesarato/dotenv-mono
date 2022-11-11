@@ -88,6 +88,10 @@ class DotEnv {
 		);
 	}
 
+	parse() {
+		return dotenv.parse.apply(this, arguments);
+	}
+
 	load(loadOnProcess = true) {
 		if (!this.path) {
 			this.path = this.find();
