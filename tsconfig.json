@@ -16,7 +16,7 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"sourceMap": true,
-		"target": "esnext",
+		"target": "es6",
 		"module": "commonjs",
 		"outDir": "./dist",
 		"baseUrl": "./src"
