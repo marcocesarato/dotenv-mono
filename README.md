@@ -55,7 +55,7 @@ overwrite the files upper, having a higher priority.
 
 ```text
 ├── .env            | PRIORITY = 1
-├── apps             | --------------
+├── apps            | --------------
 │   ├── .env.local  | PRIORITY = 150
 │   ├── nextjs      | --------------
 │   │   ├── .env    | PRIORITY = 201
