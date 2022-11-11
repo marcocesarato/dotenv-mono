@@ -21,23 +21,19 @@ This is a package that permit to load a dotenv even from a children applications
 It's based over [dotenv](https://github.com/motdotla/dotenv) package.
 
 It contains also some additionals features like manipulations and save of the changes on the dotenv file.
+
 The plugin [dotenv-expand](https://www.npmjs.com/package/dotenv-expand) is enabled by default.
 
-##### Example
+##### Structure Example
 
 ```text
 ├── .env
 ├── packages
-│   ├── my-package
-│   │   ├── index.js
-│   ├── my-package-2
-│   │   ├── index.js
-├── app
+│   ├── ui-library
+│   ├── other-library
+├── apps
 │   ├── nextjs
-│   │   ├── next.config.js
-│   ├── angular
-│   │   ├── src
-│   │   |   ├── environment.ts
+│   ├── docs
 ```
 
 #### How it works?
@@ -57,12 +53,13 @@ overwrite the files upper, having a higher priority.
 
 ###### Example
 
+
 ```text
-├── .env                    | PRIORITY = 1
-├── app                     | --------------
-│   ├── .env.local          | PRIORITY = 150
-│   ├── nextjs              | --------------
-│   │   ├── .env            | PRIORITY = 201
+├── .env            | PRIORITY = 1
+├── apps             | --------------
+│   ├── .env.local  | PRIORITY = 150
+│   ├── nextjs      | --------------
+│   │   ├── .env    | PRIORITY = 201
 ```
 
 They can be customized on the constructor `priorities` property, see the example below on
@@ -160,8 +157,6 @@ dotenv.save({
 
 ## 💡 Methods
 
-> Work in progress...
-
 ### Config
 
 | Setting      | Description                                                                                                     | Default                       |
@@ -182,7 +177,7 @@ dotenv.save({
 
 It will read your `.env` file following the criteria, parse the contents, assign it to `process.env`.
 
-```ts
+```
 public load(loadOnProcess: boolean): DotEnv;
 ```
 
@@ -190,7 +185,7 @@ public load(loadOnProcess: boolean): DotEnv;
 
 It will read your `.env` file following the criteria, parse the contents, ready to be read or changed programmatically.
 
-```ts
+```
 public loadFile(): DotEnv;
 ```
 
@@ -198,7 +193,7 @@ public loadFile(): DotEnv;
 
 Merge the data on input with the loaded data from `load` or `loadFile`, and save the changes on the original dotenv file.
 
-```ts
+```
 public save(changes: Record<string, any>): DotEnv;
 ```
 
@@ -206,7 +201,7 @@ public save(changes: Record<string, any>): DotEnv;
 
 See the [dotenv](https://github.com/motdotla/dotenv) documentation [HERE](https://github.com/motdotla/dotenv#parse)
 
-```ts
+```
 public parse<T extends Record<string, any> = Record<string, any>>(src: string | Buffer): T;
 ```
 
