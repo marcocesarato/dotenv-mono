@@ -110,7 +110,7 @@ export class Dotenv {
 	}
 
 	set priorities(value: DotenvPriorities | undefined) {
-		this._nodeEnv = process.env.NODE_ENV || "development";
+		this._nodeEnv = process.env.NODE_ENV ?? "development";
 		const ext: string = this.extension ? `.${this.extension}` : "";
 		this._priorities = Object.assign(
 			{
@@ -119,7 +119,7 @@ export class Dotenv {
 				[`.env${ext}.${this._nodeEnv}`]: 25,
 				[`.env${ext}`]: 1,
 			},
-			value || {},
+			value ?? {},
 		);
 	}
 
@@ -139,9 +139,9 @@ export class Dotenv {
 					override: this.override,
 				});
 				if (this.expand) {
-					this.env = dotenvExpand.expand(config)?.parsed || {};
+					this.env = dotenvExpand.expand(config)?.parsed ?? {};
 				} else {
-					this.env = config?.parsed || {};
+					this.env = config?.parsed ?? {};
 				}
 			}
 			this.plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
