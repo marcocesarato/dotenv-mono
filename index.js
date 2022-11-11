@@ -5,30 +5,57 @@ const dotenvExpand = require("dotenv-expand");
 
 class DotEnv {
 	constructor(props = {}) {
-		this.env = {};
 		this.path = props.path;
-		this.expand = props.expand || false;
-		this.extension = props.extension;
 		this.cwd = props.cwd;
-		this.depth = props.depth || 4;
-		this.setPriorities(props.priorities);
+		this.extension = props.extension;
+		this.expand = props.expand;
+		this.depth = props.depth;
+		this.priorities = props.priorities;
 	}
 
-	setPriorities(priorities = {}) {
-		this.nodeEnv = process.env.NODE_ENV || "development";
+	get expand() {
+		if (this._expand == null) return true;
+		return this._expand;
+	}
 
+	set expand(value) {
+		this._expand = value;
+	}
+
+	get cwd() {
+		if (this._cwd == null) return process.cwd() || "";
+		return this._cwd;
+	}
+
+	set cwd(value) {
+		this._cwd = value;
+	}
+
+	get depth() {
+		if (this._depth == null) return 4;
+		return this._depth;
+	}
+
+	set depth(value) {
+		this._depth = value;
+	}
+
+	get priorities() {
+		return this._priorities;
+	}
+
+	set priorities(value) {
+		this.nodeEnv = process.env.NODE_ENV || "development";
 		const ext = this.extension ? `.${this.extension}` : "";
-		this.priorities = Object.assign(
+		this._priorities = Object.assign(
 			{
 				[`.env${ext}.${this.nodeEnv}.local`]: 75,
 				[`.env${ext}.local`]: 50,
 				[`.env${ext}.${this.nodeEnv}`]: 25,
 				[`.env${ext}`]: 1,
 			},
-			priorities || {},
+			value || {},
 		);
-
-		return this;
 	}
 
 	load(loadOnProcess = true) {
@@ -46,7 +73,7 @@ class DotEnv {
 					this.env = config?.parsed || {};
 				}
 			}
-			this.envString = fs.readFileSync(this.path, {encoding: "utf8", flag: "r"});
+			this.plain = fs.readFileSync(this.path, {encoding: "utf8", flag: "r"});
 		}
 		return this;
 	}
@@ -58,7 +85,7 @@ class DotEnv {
 
 	find() {
 		let dotenv = null;
-		let directory = path.resolve(this.cwd || process.cwd() || "");
+		let directory = path.resolve(this.cwd);
 		const {root} = path.parse(directory);
 		const matcher = (cwd) => {
 			const priority = -1;
@@ -93,7 +120,7 @@ class DotEnv {
 	}
 
 	save(changes) {
-		if (!this.envString) return;
+		if (!this.plain) return;
 
 		// https://github.com/stevenvachon/edit-dotenv
 		// Steven Vachon
@@ -116,7 +143,7 @@ class DotEnv {
 				.replace(returnPattern, returnReplacement)
 				.trim();
 			const safeName = this.escapeRegExp(varname);
-			const varPattern = new RegExp(`^(${h}*${safeName}${h}*=${h}*).*?(${h}*)$`, flags);
+			const varPattern = new RegExp(`^(${h}*${safeName}${h}*=${h}*).*?(${h}*)$`, flags); // fixed regex
 			if (varPattern.test(result)) {
 				const safeValue = value.replace(groupPattern, groupReplacement);
 				return result.replace(varPattern, `$1${safeValue}$2`);
@@ -138,7 +165,7 @@ class DotEnv {
 				// Add break for appended variable
 				return `${result}${varname}=${value}${EOL}`;
 			}
-		}, this.envString);
+		}, this.plain);
 		fs.writeFileSync(this.path, data, {
 			encoding: "utf8",
 		});

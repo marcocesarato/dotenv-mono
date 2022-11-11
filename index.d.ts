@@ -8,6 +8,7 @@ export type DontEnvArgs = {
 	cwd?: string;
 };
 export class DotEnv {
+	// public
 	public path: string | null | undefined;
 	public cwd: string | null | undefined;
 	public priorities?: {[key: string]: number} | null | undefined;
@@ -15,13 +16,19 @@ export class DotEnv {
 	public depth: number | null | undefined;
 	public expand: string | null | undefined;
 	public env: Data | null | undefined;
-	public envString: string | null | undefined;
+	public plain: string | null | undefined;
+	// private
+	private _cwd: string | null | undefined;
+	private _priorities?: {[key: string]: number} | null | undefined;
+	private _depth: number | null | undefined;
+	private _expand: string | null | undefined;
+
+	// methods
 	constructor(args?: DontEnvArgs);
 	public load(loadOnProcess: boolean): DotEnv;
 	public get(): Data;
 	public find(): string | null;
 	public save(changes: Data): DotEnv;
-	public setPriorities(priorities?: {[key: string]: number}): DotEnv;
 	private escapeRegExp(value: string): string;
 }
 export function dotenvLoad(ext?: string, path?: string): DotEnv;
