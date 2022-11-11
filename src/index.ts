@@ -194,9 +194,6 @@ export class Dotenv {
 		if (!this.plain || !this.path) return this;
 
 		// https://github.com/stevenvachon/edit-dotenv
-		// Steven Vachon
-		// @stevenvachon
-
 		const EOL = "\r\n";
 		const breakPattern = /\n/g;
 		const breakReplacement = "\\n";
@@ -208,33 +205,34 @@ export class Dotenv {
 		const returnReplacement = "\\r";
 
 		let hasAppended = false;
-		const data = Object.keys(changes).reduce((result, varname) => {
-			const value = changes[varname]
+		const data = Object.keys(changes).reduce((result: string, variable: string) => {
+			const value = changes[variable]
 				.replace(breakPattern, breakReplacement)
 				.replace(returnPattern, returnReplacement)
 				.trim();
-			const safeName = this.escapeRegExp(varname);
-			const varPattern = new RegExp(`^(${h}*${safeName}${h}*=${h}*).*?(${h}*)$`, flags); // fixed regex
+			const safeName = this.escapeRegExp(variable);
+			// Match all between equal and eol
+			const varPattern = new RegExp(`^(${h}*${safeName}${h}*=${h}*).*?(${h}*)$`, flags);
 			if (varPattern.test(result)) {
 				const safeValue = value.replace(groupPattern, groupReplacement);
 				return result.replace(varPattern, `$1${safeValue}$2`);
 			} else if (result === "") {
 				hasAppended = true;
-				return `${varname}=${value}${EOL}`;
+				return `${variable}=${value}${EOL}`;
 			} else if (!result.endsWith(EOL) && !hasAppended) {
 				hasAppended = true;
 				// Add an extra break between previously defined and newly appended variable
-				return `${result}${EOL}${EOL}${varname}=${value}`;
+				return `${result}${EOL}${EOL}${variable}=${value}`;
 			} else if (!result.endsWith(EOL)) {
 				// Add break for appended variable
-				return `${result}${EOL}${varname}=${value}`;
+				return `${result}${EOL}${variable}=${value}`;
 			} else if (result.endsWith(EOL) && !hasAppended) {
 				hasAppended = true;
 				// Add an extra break between previously defined and newly appended variable
-				return `${result}${EOL}${varname}=${value}${EOL}`;
+				return `${result}${EOL}${variable}=${value}${EOL}`;
 			} else {
 				// Add break for appended variable
-				return `${result}${varname}=${value}${EOL}`;
+				return `${result}${variable}=${value}${EOL}`;
 			}
 		}, this.plain);
 		fs.writeFileSync(this.path, data, {
