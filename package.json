@@ -1,10 +1,14 @@
 {
 	"name": "dotenv-mono",
 	"version": "0.2.0",
-	"main": "index.js",
-	"module": "index.js",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"description": "This is a package that permit to load a dotenv even from a children applications or packages of a monorepo. It contains also some additionals features like manipulations and save of the changes on the dotenv file.",
 	"author": "Marco Cesarato <cesarato.developer@gmail.com>",
+	"files": [
+		"dist"
+	],
 	"bugs": {
 		"url": "https://github.com/marcocesarato/dotenv/issues"
 	},
@@ -14,7 +18,9 @@
 		"release": "standard-version",
 		"lint": "eslint --ext .js,.ts .",
 		"lint:fix": "eslint --ext .js,.ts . --fix",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"build": "tsc",
+		"tsc": "tsc"
 	},
 	"dependencies": {
 		"dotenv": "^16.0.3",
@@ -22,6 +28,8 @@
 	},
 	"devDependencies": {
 		"@types/node": "^18.11.9",
+		"@typescript-eslint/eslint-plugin": "^5.42.1",
+		"@typescript-eslint/parser": "^5.42.1",
 		"eslint": "8.27.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-prettier": "^4.2.1",
@@ -29,7 +37,8 @@
 		"husky": "^8.0.2",
 		"lint-staged": "^13.0.3",
 		"prettier": "^2.7.1",
-		"standard-version": "^9.5.0"
+		"standard-version": "^9.5.0",
+		"typescript": "^4.8.4"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -48,7 +57,6 @@
 			"postchangelog": "prettier -w CHANGELOG.md"
 		}
 	},
-	"types": "./index.d.ts",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/marcocesarato/dotenv-mono.git"

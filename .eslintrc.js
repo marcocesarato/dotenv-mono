@@ -1,12 +1,15 @@
 module.exports = {
+	root: true,
+	parser: "@typescript-eslint/parser",
 	extends: ["prettier", "plugin:prettier/recommended"],
-	plugins: ["simple-import-sort", "prettier"],
+	plugins: ["@typescript-eslint", "simple-import-sort", "prettier"],
 	env: {
 		node: true,
 		browser: true,
 		jest: true,
 	},
 	parserOptions: {
+		sourceType: "module",
 		ecmaVersion: "latest",
 	},
 	rules: {
@@ -14,4 +17,5 @@ module.exports = {
 		"no-var": "warn",
 		"prefer-const": "warn",
 	},
+	ignorePatterns: ["**/build/**/*"],
 };

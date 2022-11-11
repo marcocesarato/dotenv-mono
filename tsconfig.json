@@ -1,0 +1,26 @@
+{
+	"$schema": "https://json.schemastore.org/tsconfig",
+	"display": "DotEnv",
+	"compilerOptions": {
+		"composite": false,
+		"declaration": true,
+		"declarationMap": true,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"inlineSources": false,
+		"isolatedModules": true,
+		"moduleResolution": "node",
+		"noUnusedLocals": false,
+		"noUnusedParameters": false,
+		"preserveWatchOutput": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"sourceMap": true,
+		"target": "esnext",
+		"module": "commonjs",
+		"outDir": "./dist",
+		"baseUrl": "./src"
+	},
+	"include": ["src"],
+	"exclude": ["node_modules", "./dist/**/*.js", "./dist/**/*.ts"]
+}
