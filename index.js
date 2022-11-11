@@ -5,17 +5,19 @@ const dotenvExpand = require("dotenv-expand");
 
 class DotEnv {
 	constructor(props = {}) {
+		this.env = {};
 		this.path = props.path;
 		this.expand = props.expand || false;
-		this.ext = props.extension;
-		this.env = {};
+		this.extension = props.extension;
+		this.cwd = props.cwd;
+		this.depth = props.depth || 4;
 		this.setPriorities(props.priorities);
 	}
 
 	setPriorities(priorities = {}) {
 		this.nodeEnv = process.env.NODE_ENV || "development";
 
-		const ext = this.ext ? `.${this.ext}` : "";
+		const ext = this.extension ? `.${this.extension}` : "";
 		this.priorities = Object.assign(
 			{
 				[`.env${ext}.${this.nodeEnv}.local`]: 75,
@@ -56,8 +58,7 @@ class DotEnv {
 
 	find() {
 		let dotenv = null;
-		let directory = path.resolve(process.cwd() || "");
-		const maxDepth = 3;
+		let directory = path.resolve(this.cwd || process.cwd() || "");
 		const {root} = path.parse(directory);
 		const matcher = (cwd) => {
 			const priority = -1;
@@ -80,7 +81,7 @@ class DotEnv {
 		};
 		let depth = 0;
 		let match = false;
-		while (maxDepth ? depth < maxDepth : true) {
+		while (this.depth ? depth < this.depth : true) {
 			depth++;
 			const foundPath = matcher(directory);
 			if (match) break;

@@ -4,10 +4,15 @@ export type DontEnvArgs = {
 	path?: string;
 	expand?: boolean;
 	priorities?: {[key: string]: number};
+	depth?: number;
+	cwd?: string;
 };
 export class DotEnv {
 	public path: string | null | undefined;
-	public ext: string | null | undefined;
+	public cwd: string | null | undefined;
+	public priorities?: {[key: string]: number} | null | undefined;
+	public extension: string | null | undefined;
+	public depth: number | null | undefined;
 	public expand: string | null | undefined;
 	public env: Data | null | undefined;
 	public envString: string | null | undefined;
