@@ -133,7 +133,7 @@ export class Dotenv {
 		if (fs.existsSync(file)) {
 			if (loadOnProcess) {
 				const config = dotenv.config({
-					path: this.path,
+					path: file,
 					debug: this.debug,
 					encoding: this.encoding,
 					override: this.override,
