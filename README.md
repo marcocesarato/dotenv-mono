@@ -39,26 +39,39 @@ The package [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) is en
 │   │   |   ├── environment.ts
 ```
 
-#### Priorities
+#### How it works?
 
-This package find up, starting from the current process directory, the first file name that match the specific
-criterias.
+##### Priorities
+
+This package find up, starting from the current process directory, the first file, that match the best specific
+filename criteria with the higher priority. The depth of the folder, starting from the current process directory,
+overwrite the files upper, having a higher priority.
 
 | Priority | File name                                |
-|----------|------------------------------------------|
+| -------- | ---------------------------------------- |
 | 75       | .env.{development,production,test}.local |
 | 50       | .env.local                               |
 | 25       | .env.{development,production,test}       |
 | 1        | .env                                     |
 
-They can be customized on the constructor `priorities` property, see the example below.
+###### Example
+
+```text
+├── .env                    | PRIORITY = 1
+├── app                     | --------------
+│   ├── .env.local          | PRIORITY = 150
+│   ├── nextjs              | --------------
+│   │   ├── .env            | PRIORITY = 201
+```
+
+They can be customized on the constructor `priorities` property, see the example below on the [usage](#change-priorities) section.
 
 ## 📖 Install
 
 Install the library from npm or yarn just running one of the following command lines:
 
 | npm                              | yarn                   |
-|----------------------------------|------------------------|
+| -------------------------------- | ---------------------- |
 | `npm install dotenv-mono --save` | `yarn add dotenv-mono` |
 
 ### Install on Next.js
@@ -70,7 +83,7 @@ Add these lines at the top of the file:
 
 ```js
 // Load dotenv-mono
-const { dotenvLoad } = require("dotenv-mono");
+const {dotenvLoad} = require("dotenv-mono");
 dotenvLoad();
 
 /* other */
@@ -79,10 +92,10 @@ dotenvLoad();
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
-  /* config options here */
-}
+	/* config options here */
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
 ```
 
 ## 💻 Usage
@@ -90,12 +103,12 @@ module.exports = nextConfig
 ### Load
 
 ```js
-const { dotenvLoad } = require("dotenv-mono");
+const {dotenvLoad} = require("dotenv-mono");
 const dotenv = dotenvLoad();
 
 // Same as
 
-const { DotEnv } = require("dotenv-mono");
+const {DotEnv} = require("dotenv-mono");
 const dotenv = new DotEnv();
 dotenv.load();
 ```
@@ -104,20 +117,20 @@ dotenv.load();
 
 ```js
 // Use .dotenv.server or .dotenv.server.local, etc...
-dotenvLoad({ extension: "server" });
+dotenvLoad({extension: "server"});
 ```
 
 ### Load specific file
 
 ```js
 // You can specify the file path
-dotenvLoad({ path: "../../configs/.env" });
+dotenvLoad({path: "../../configs/.env"});
 ```
 
 ### Load without [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) extension
 
 ```js
-dotenvLoad({ expand: false });
+dotenvLoad({expand: false});
 ```
 
 ### Change priorities
@@ -125,9 +138,9 @@ dotenvLoad({ expand: false });
 ```js
 // If .dotenv.overwrite is present use it with max priority
 dotenvLoad({
-  priorities: {
-    ".env.overwrite": 100,
-  },
+	priorities: {
+		".env.overwrite": 100,
+	},
 });
 ```
 
@@ -137,11 +150,26 @@ dotenvLoad({
 const dotenv = new DotEnv();
 dotenv.loadFile(); // Not loading into process
 dotenv.save({
-  "MY_ENV_1": "enjoy",
-  "MY_ENV_2": "'enjoy quotes'",
-  "MY_ENV_3": 999,
+	"MY_ENV_1": "enjoy",
+	"MY_ENV_2": "'enjoy quotes'",
+	"MY_ENV_3": 999,
 });
 ```
+
+## 💡 Methods
+
+> Work in progress...
+
+### Config
+
+| Setting      | Description                                                                                  | Default                       |
+| ------------ | -------------------------------------------------------------------------------------------- | ----------------------------- |
+| `expand`     | Enable or disable [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) plugin      | `true`                        |
+| `priorities` | Set the criteria of the filename priority to load as dotenv file                             | See [Priorities](#priorities) |
+| `depth`      | Set max depth of folder to search up from the children directory                             | `4`                           |
+| `cwd`        | Set the current working directory                                                            |                               |
+| `path`       | Set the file to load                                                                         |                               |
+| `extension`  | Used to load specific dotenv file used only on specific apps/packages (ex. `.env.server...`) |                               |
 
 ## 🤔 How to contribute
 
