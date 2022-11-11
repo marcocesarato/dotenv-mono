@@ -18,9 +18,10 @@
 #### What is this?
 
 This is a package that permit to load a dotenv even from a children applications or packages of a monorepo.
+It's based over [dotenv](https://github.com/motdotla/dotenv) package.
 
 It contains also some additionals features like manipulations and save of the changes on the dotenv file.
-The package [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) is enabled by default.
+The plugin [dotenv-expand](https://www.npmjs.com/package/dotenv-expand) is enabled by default.
 
 ##### Example
 
@@ -64,7 +65,8 @@ overwrite the files upper, having a higher priority.
 │   │   ├── .env            | PRIORITY = 201
 ```
 
-They can be customized on the constructor `priorities` property, see the example below on the [usage](#change-priorities) section.
+They can be customized on the constructor `priorities` property, see the example below on
+the [usage](#change-priorities) section.
 
 ## 📖 Install
 
@@ -162,14 +164,51 @@ dotenv.save({
 
 ### Config
 
-| Setting      | Description                                                                                  | Default                       |
-| ------------ | -------------------------------------------------------------------------------------------- | ----------------------------- |
-| `expand`     | Enable or disable [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) plugin      | `true`                        |
-| `priorities` | Set the criteria of the filename priority to load as dotenv file                             | See [Priorities](#priorities) |
-| `depth`      | Set max depth of folder to search up from the children directory                             | `4`                           |
-| `cwd`        | Set the current working directory                                                            |                               |
-| `path`       | Set the file to load                                                                         |                               |
-| `extension`  | Used to load specific dotenv file used only on specific apps/packages (ex. `.env.server...`) |                               |
+| Setting      | Description                                                                                                     | Default                       |
+| ------------ | --------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `expand`     | Turn on/off the [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) plugin                           | `true`                        |
+| `priorities` | Specify the criteria of the filename priority to load as dotenv file                                            | See [Priorities](#priorities) |
+| `depth`      | Specify the max depth to reach finding up the folder from the children directory                                | `4`                           |
+| `cwd`        | Specify the current working directory                                                                           | `process.cwd()`               |
+| `path`       | Specify a custom path if your file containing environment variables is located elsewhere                        |                               |
+| `extension`  | Specify to load specific dotenv file used only on specific apps/packages (ex. `.env.server...`)                 |                               |
+| `encoding`   | Specify the encoding of your file containing environment variables                                              | `utf8`                        |
+| `debug`      | Turn on/off logging to help debug why certain keys or values are not being set as you expect                    | `false`                       |
+| `override`   | Override any environment variables that have already been set on your machine with values from your `.env` file | `false`                       |
+
+### Methods
+
+#### Load
+
+It will read your `.env` file following the criteria, parse the contents, assign it to `process.env`.
+
+```ts
+public load(loadOnProcess: boolean): DotEnv;
+```
+
+#### LoadFile
+
+It will read your `.env` file following the criteria, parse the contents, ready to be read or changed programmatically.
+
+```ts
+public loadFile(): DotEnv;
+```
+
+#### Save
+
+Merge the data on input with the loaded data from `load` or `loadFile`, and save the changes on the original dotenv file.
+
+```ts
+public save(changes: Record<string, any>): DotEnv;
+```
+
+#### Parse
+
+See the [dotenv](https://github.com/motdotla/dotenv) documentation [HERE](https://github.com/motdotla/dotenv#parse)
+
+```ts
+public parse<T extends Record<string, any> = Record<string, any>>(src: string | Buffer): T;
+```
 
 ## 🤔 How to contribute
 
