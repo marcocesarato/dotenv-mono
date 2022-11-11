@@ -20,7 +20,8 @@
 		"lint:fix": "eslint --ext .js,.ts . --fix",
 		"format": "prettier --write .",
 		"build": "tsc",
-		"tsc": "tsc"
+		"tsc": "tsc",
+		"prepare": "tsc"
 	},
 	"dependencies": {
 		"dotenv": "^16.0.3",
