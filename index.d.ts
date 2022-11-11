@@ -14,14 +14,20 @@ export class DotEnv {
 	public priorities?: {[key: string]: number} | null | undefined;
 	public extension: string | null | undefined;
 	public depth: number | null | undefined;
-	public expand: string | null | undefined;
+	public expand: boolean | null | undefined;
 	public env: Data | null | undefined;
 	public plain: string | null | undefined;
+	public encoding: string | null | undefined;
+	public debug: boolean | null | undefined;
+	public override: boolean | null | undefined;
 	// private
 	private _cwd: string | null | undefined;
 	private _priorities?: {[key: string]: number} | null | undefined;
 	private _depth: number | null | undefined;
-	private _expand: string | null | undefined;
+	private _expand: boolean | null | undefined;
+	private _encoding: string | null | undefined;
+	private _debug: boolean | null | undefined;
+	private _override: boolean | null | undefined;
 
 	// methods
 	constructor(args?: DontEnvArgs);

@@ -11,6 +11,27 @@ class DotEnv {
 		this.expand = props.expand;
 		this.depth = props.depth;
 		this.priorities = props.priorities;
+		this.encoding = props.encoding;
+		this.debug = props.debug;
+		this.override = props.override;
+	}
+
+	get debug() {
+		if (this._debug == null) return false;
+		return this._debug;
+	}
+
+	set debug(value) {
+		this._debug = value;
+	}
+
+	get encoding() {
+		if (this._encoding == null) return "utf8";
+		return this._encoding;
+	}
+
+	set encoding(value) {
+		this._encoding = value;
 	}
 
 	get expand() {
@@ -40,6 +61,15 @@ class DotEnv {
 		this._depth = value;
 	}
 
+	get override() {
+		if (this._override == null) return false;
+		return this._override;
+	}
+
+	set override(value) {
+		this._override = value;
+	}
+
 	get priorities() {
 		return this._priorities;
 	}
@@ -66,6 +96,9 @@ class DotEnv {
 			if (loadOnProcess) {
 				const config = dotenv.config({
 					path: this.path,
+					debug: this.debug,
+					encoding: this.encoding,
+					override: this.override,
 				});
 				if (this.expand) {
 					this.env = dotenvExpand.expand(config)?.parsed || {};
@@ -73,7 +106,7 @@ class DotEnv {
 					this.env = config?.parsed || {};
 				}
 			}
-			this.plain = fs.readFileSync(this.path, {encoding: "utf8", flag: "r"});
+			this.plain = fs.readFileSync(this.path, {encoding: this.encoding, flag: "r"});
 		}
 		return this;
 	}
@@ -167,7 +200,7 @@ class DotEnv {
 			}
 		}, this.plain);
 		fs.writeFileSync(this.path, data, {
-			encoding: "utf8",
+			encoding: this.encoding,
 		});
 		return this;
 	}
