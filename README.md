@@ -53,7 +53,6 @@ overwrite the files upper, having a higher priority.
 
 ###### Example
 
-
 ```text
 ├── .env            | PRIORITY = 1
 ├── apps             | --------------
@@ -107,8 +106,8 @@ const dotenv = dotenvLoad();
 
 // Same as
 
-const {DotEnv} = require("dotenv-mono");
-const dotenv = new DotEnv();
+const {Dotenv} = require("dotenv-mono");
+const dotenv = new Dotenv();
 dotenv.load();
 ```
 
@@ -146,7 +145,7 @@ dotenvLoad({
 ### Make changes
 
 ```js
-const dotenv = new DotEnv();
+const dotenv = new Dotenv();
 dotenv.loadFile(); // Not loading into process
 dotenv.save({
 	"MY_ENV_1": "enjoy",
@@ -178,7 +177,7 @@ dotenv.save({
 It will read your `.env` file following the criteria, parse the contents, assign it to `process.env`.
 
 ```
-public load(loadOnProcess: boolean): DotEnv;
+public load(loadOnProcess: boolean): Dotenv;
 ```
 
 #### LoadFile
@@ -186,7 +185,7 @@ public load(loadOnProcess: boolean): DotEnv;
 It will read your `.env` file following the criteria, parse the contents, ready to be read or changed programmatically.
 
 ```
-public loadFile(): DotEnv;
+public loadFile(): Dotenv;
 ```
 
 #### Save
@@ -194,7 +193,7 @@ public loadFile(): DotEnv;
 Merge the data on input with the loaded data from `load` or `loadFile`, and save the changes on the original dotenv file.
 
 ```
-public save(changes: Record<string, any>): DotEnv;
+public save(changes: Record<string, any>): Dotenv;
 ```
 
 #### Parse

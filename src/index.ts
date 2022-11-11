@@ -1,102 +1,136 @@
-const fs = require("fs");
-const path = require("path");
-const dotenv = require("dotenv");
-const dotenvExpand = require("dotenv-expand");
+import fs from "fs";
+import path from "path";
+import dotenv, {DotenvParseOutput} from "dotenv";
+import dotenvExpand from "dotenv-expand";
 
-class DotEnv {
-	constructor(props = {}) {
-		this.path = props.path;
-		this.cwd = props.cwd;
-		this.extension = props.extension;
-		this.expand = props.expand;
-		this.depth = props.depth;
-		this.priorities = props.priorities;
-		this.encoding = props.encoding;
-		this.debug = props.debug;
-		this.override = props.override;
+export type DotenvData = Record<string, any>;
+
+export type DotenvPriorities = {[key: string]: number};
+
+export type DotenvArgs = {
+	cwd?: string;
+	debug?: boolean;
+	depth?: number;
+	encoding?: BufferEncoding;
+	extension?: string;
+	expand?: boolean;
+	override?: boolean;
+	path?: string;
+	priorities?: DotenvPriorities;
+};
+
+export class Dotenv {
+	public env: DotenvData = {};
+	public extension: string | undefined;
+	public path: string | undefined;
+	public plain: string = "";
+
+	private _cwd: string | undefined;
+	private _debug: boolean = false;
+	private _depth: number = 4;
+	private _encoding: BufferEncoding = "utf8";
+	private _expand: boolean = true;
+	private _override: boolean = false;
+	private _priorities: DotenvPriorities = {};
+	private _nodeEnv: string = "";
+
+	constructor({
+		path,
+		cwd,
+		extension,
+		expand,
+		depth,
+		priorities,
+		encoding,
+		debug,
+		override,
+	}: DotenvArgs = {}) {
+		this.path = path;
+		this.cwd = cwd;
+		this.extension = extension;
+		this.expand = expand;
+		this.depth = depth;
+		this.priorities = priorities;
+		this.encoding = encoding;
+		this.debug = debug;
+		this.override = override;
 	}
 
 	get debug() {
-		if (this._debug == null) return false;
 		return this._debug;
 	}
 
-	set debug(value) {
-		this._debug = value;
+	set debug(value: boolean | undefined) {
+		if (value != null) this._debug = value;
 	}
 
-	get encoding() {
-		if (this._encoding == null) return "utf8";
+	get encoding(): BufferEncoding {
 		return this._encoding;
 	}
 
-	set encoding(value) {
-		this._encoding = value;
+	set encoding(value: BufferEncoding | undefined) {
+		if (value != null) this._encoding = value;
 	}
 
 	get expand() {
-		if (this._expand == null) return true;
 		return this._expand;
 	}
 
-	set expand(value) {
-		this._expand = value;
+	set expand(value: boolean | undefined) {
+		if (value != null) this._expand = value;
 	}
 
-	get cwd() {
+	get cwd(): string {
 		if (this._cwd == null) return process.cwd() || "";
 		return this._cwd;
 	}
 
-	set cwd(value) {
+	set cwd(value: string | undefined) {
 		this._cwd = value;
 	}
 
 	get depth() {
-		if (this._depth == null) return 4;
 		return this._depth;
 	}
 
-	set depth(value) {
-		this._depth = value;
+	set depth(value: number | undefined) {
+		if (value != null) this._depth = value;
 	}
 
 	get override() {
-		if (this._override == null) return false;
 		return this._override;
 	}
 
-	set override(value) {
-		this._override = value;
+	set override(value: boolean | undefined) {
+		if (value != null) this._override = value;
 	}
 
-	get priorities() {
+	get priorities(): DotenvPriorities {
 		return this._priorities;
 	}
 
-	set priorities(value) {
-		this.nodeEnv = process.env.NODE_ENV || "development";
-		const ext = this.extension ? `.${this.extension}` : "";
+	set priorities(value: DotenvPriorities | undefined) {
+		this._nodeEnv = process.env.NODE_ENV || "development";
+		const ext: string = this.extension ? `.${this.extension}` : "";
 		this._priorities = Object.assign(
 			{
-				[`.env${ext}.${this.nodeEnv}.local`]: 75,
+				[`.env${ext}.${this._nodeEnv}.local`]: 75,
 				[`.env${ext}.local`]: 50,
-				[`.env${ext}.${this.nodeEnv}`]: 25,
+				[`.env${ext}.${this._nodeEnv}`]: 25,
 				[`.env${ext}`]: 1,
 			},
 			value || {},
 		);
 	}
 
-	parse() {
-		return dotenv.parse.apply(this, arguments);
+	parse<T extends DotenvParseOutput = DotenvParseOutput>(): T {
+		// @ts-ignore
+		return dotenv.parse.apply(this, Array.from(arguments));
 	}
 
-	load(loadOnProcess = true) {
-		if (!this.path) {
-			this.path = this.find();
-		}
-		if (fs.existsSync(this.path)) {
+	load(loadOnProcess: boolean = true): this {
+		const file: string = this.path ?? (this.find() as string);
+		if (fs.existsSync(file)) {
 			if (loadOnProcess) {
 				const config = dotenv.config({
 					path: this.path,
@@ -110,21 +144,21 @@ class DotEnv {
 					this.env = config?.parsed || {};
 				}
 			}
-			this.plain = fs.readFileSync(this.path, {encoding: this.encoding, flag: "r"});
+			this.plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
 		}
 		return this;
 	}
 
-	loadFile() {
+	loadFile(): this {
 		this.load(false);
 		return this;
 	}
 
-	find() {
-		let dotenv = null;
+	find(): string | undefined {
+		let dotenv: string | undefined;
 		let directory = path.resolve(this.cwd);
 		const {root} = path.parse(directory);
-		const matcher = (cwd) => {
+		const matcher = (cwd: string) => {
 			const priority = -1;
 			Object.keys(this.priorities).forEach((fileName) => {
 				if (
@@ -156,8 +190,8 @@ class DotEnv {
 		return dotenv;
 	}
 
-	save(changes) {
-		if (!this.plain) return;
+	save(changes: DotenvData): this {
+		if (!this.plain || !this.path) return this;
 
 		// https://github.com/stevenvachon/edit-dotenv
 		// Steven Vachon
@@ -209,15 +243,12 @@ class DotEnv {
 		return this;
 	}
 
-	escapeRegExp(string) {
+	escapeRegExp(string: string): string {
 		return string.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
 	}
 }
 
-module.exports = {
-	DotEnv,
-	dotenvLoad: (...args) => {
-		const dotenv = new DotEnv(...args);
-		return dotenv.load();
-	},
-};
+export function dotenvLoad(): Dotenv {
+	const dotenv = new Dotenv(...arguments);
+	return dotenv.load();
+}
