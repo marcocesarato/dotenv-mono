@@ -6,7 +6,7 @@ const dotenvExpand = require("dotenv-expand");
 class DotEnv {
 	constructor(props = {}) {
 		this.path = props.path;
-		this.expand = props.expand ?? false;
+		this.expand = props.expand || false;
 		this.ext = props.extension;
 		this.env = {};
 		this.setPriorities(props.priorities);
@@ -16,13 +16,15 @@ class DotEnv {
 		this.nodeEnv = process.env.NODE_ENV || "development";
 
 		const ext = this.ext ? `.${this.ext}` : "";
-		this.priorities = {
-			[`.env${ext}.${this.nodeEnv}.local`]: 75,
-			[`.env${ext}.local`]: 50,
-			[`.env${ext}.${this.nodeEnv}`]: 25,
-			[`.env${ext}`]: 1,
-			...(priorities ?? {}),
-		};
+		this.priorities = Object.assign(
+			{
+				[`.env${ext}.${this.nodeEnv}.local`]: 75,
+				[`.env${ext}.local`]: 50,
+				[`.env${ext}.${this.nodeEnv}`]: 25,
+				[`.env${ext}`]: 1,
+			},
+			priorities || {},
+		);
 
 		return this;
 	}
@@ -37,9 +39,9 @@ class DotEnv {
 					path: this.path,
 				});
 				if (this.expand) {
-					this.env = dotenvExpand.expand(config)?.parsed ?? {};
+					this.env = dotenvExpand.expand(config)?.parsed || {};
 				} else {
-					this.env = config?.parsed ?? {};
+					this.env = config?.parsed || {};
 				}
 			}
 			this.envString = fs.readFileSync(this.path, {encoding: "utf8", flag: "r"});
