@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0](https://github.com/marcocesarato/dotenv-mono/compare/v0.2.0...v1.0.0) (2022-11-11)
+
+### Bug Fixes
+
+-   cwd not undefined ([191e0eb](https://github.com/marcocesarato/dotenv-mono/commit/191e0ebd0e0c23bcfc4c649de41fcadbf78f7b73))
+
 ## [0.2.0](https://github.com/marcocesarato/dotenv-mono/compare/v0.1.2...v0.2.0) (2022-11-11)
 
 ### Features
