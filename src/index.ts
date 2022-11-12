@@ -12,8 +12,8 @@ export type DotenvArgs = {
 	debug?: boolean;
 	depth?: number;
 	encoding?: BufferEncoding;
-	extension?: string;
 	expand?: boolean;
+	extension?: string;
 	override?: boolean;
 	path?: string;
 	priorities?: DotenvPriorities;
@@ -35,25 +35,25 @@ export class Dotenv {
 	private _nodeEnv: string = "";
 
 	constructor({
-		path,
 		cwd,
-		extension,
-		expand,
-		depth,
-		priorities,
-		encoding,
 		debug,
+		depth,
+		encoding,
+		expand,
+		extension,
 		override,
+		path,
+		priorities,
 	}: DotenvArgs = {}) {
-		this.path = path;
 		this.cwd = cwd;
-		this.extension = extension;
-		this.expand = expand;
-		this.depth = depth;
-		this.priorities = priorities;
-		this.encoding = encoding;
 		this.debug = debug;
+		this.depth = depth;
+		this.encoding = encoding;
+		this.expand = expand;
+		this.extension = extension;
 		this.override = override;
+		this.path = path;
+		this.priorities = priorities;
 	}
 
 	get debug() {
