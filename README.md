@@ -106,15 +106,36 @@ module.exports = nextConfig;
 
 ### Load
 
+#### Standard
+
 ```js
+require("dotenv-mono").load();
+
+// or
+
 const {dotenvLoad} = require("dotenv-mono");
-const dotenv = dotenvLoad();
+dotenvLoad();
 
-// Same as
+// or
 
+import {dotenvLoad} from "dotenv-mono";
+dotenvLoad();
+```
+
+#### Using the class
+
+```js
 const {Dotenv} = require("dotenv-mono");
 const dotenv = new Dotenv();
 dotenv.load();
+```
+
+#### Having the output
+
+If you want to have back directly the output like [dotenv](https://github.com/motdotla/dotenv) package.
+
+```js
+require("dotenv-mono").config();
 ```
 
 ### Load file with extension

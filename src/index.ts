@@ -20,54 +20,54 @@ export type DotenvArgs = {
 	/**
 	 * Specify the current working directory
 	 * @defaultValue `process.cwd()`
-	 * @example `require('dotenv-mono').dotenvLoad({ cwd: 'latin1' })`
+	 * @example `require('dotenv-mono').load({ cwd: 'latin1' })`
 	 */
 	cwd?: string;
 	/**
 	 * Turn on/off logging to help debug why certain keys or values are not being set as you expect
 	 * @defaultValue `false`
-	 * @example `require('dotenv-mono').dotenvLoad({ debug: true })`
+	 * @example `require('dotenv-mono').load({ debug: true })`
 	 */
 	debug?: boolean;
 	/**
 	 * Specify the max depth to reach finding up the folder from the children directory
 	 * @defaultValue `4`
-	 * @example `require('dotenv-mono').dotenvLoad({ depth: 3 })`
+	 * @example `require('dotenv-mono').load({ depth: 3 })`
 	 */
 	depth?: number;
 	/**
 	 * Specify the encoding of your file containing environment variables
 	 * @defaultValue `utf8`
-	 * @example `require('dotenv-mono').dotenvLoad({ encoding: 'latin1' })`
+	 * @example `require('dotenv-mono').load({ encoding: 'latin1' })`
 	 */
 	encoding?: BufferEncoding;
 	/**
 	 * Turn on/off the dotenv-expand plugin
 	 * @defaultValue `true`
-	 * @example `require('dotenv-mono').dotenvLoad({ expand: false })`
+	 * @example `require('dotenv-mono').load({ expand: false })`
 	 */
 	expand?: boolean;
 	/**
 	 * Specify to load specific dotenv file used only on specific apps/packages (ex. .env.server)
-	 * @example `require('dotenv-mono').dotenvLoad({ extension: 'server' })`
+	 * @example `require('dotenv-mono').load({ extension: 'server' })`
 	 */
 	extension?: string;
 	/**
 	 * Override any environment variables that have already been set on your machine with values from your .env file
 	 * @defaultValue `false`
-	 * @example `require('dotenv-mono').dotenvLoad({ override: true })`
+	 * @example `require('dotenv-mono').load({ override: true })`
 	 */
 	override?: boolean;
 	/**
 	 * Specify a custom path if your file containing environment variables is located elsewhere
-	 * @example `require('dotenv-mono').dotenvLoad({ path: '../../configs/.env' })`
+	 * @example `require('dotenv-mono').load({ path: '../../configs/.env' })`
 	 */
 	path?: string;
 	/**
 	 * Specify the criteria of the filename priority to load as dotenv file
 	 * @see https://github.com/marcocesarato/dotenv-mono
 	 * @defaultValue `{ '.env': 1, '.env.$(NODE_ENV)': 25, '.env.local': 50, '.env.$(NODE_ENV).local': 75 }`
-	 * @example `require('dotenv-mono').dotenvLoad({ priorities: { '.env.overwrite': 100 } })`
+	 * @example `require('dotenv-mono').load({ priorities: { '.env.overwrite': 100 } })`
 	 */
 	priorities?: DotenvPriorities;
 };
@@ -336,3 +336,23 @@ export function dotenvLoad(): Dotenv {
 	const dotenv = new Dotenv(...arguments);
 	return dotenv.load();
 }
+
+/**
+ * @see dotenvLoad
+ */
+export const load = dotenvLoad;
+
+/**
+ * Load dotenv on process and return the dotenv output
+ * @param DotenvArgs props
+ * @return Dotenv
+ */
+export function dotenvConfig(): DotenvConfigOutput {
+	const dotenv = new Dotenv(...arguments);
+	return dotenv.load().config as DotenvConfigOutput;
+}
+
+/**
+ * @see dotenvConfig
+ */
+export const config = dotenvConfig;
