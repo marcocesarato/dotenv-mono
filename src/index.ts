@@ -1,25 +1,82 @@
 import fs from "fs";
 import path from "path";
-import dotenv, {DotenvParseOutput} from "dotenv";
+import dotenv, {DotenvConfigOutput, DotenvParseOutput} from "dotenv";
 import dotenvExpand from "dotenv-expand";
 
+/**
+ * Environment variables list
+ * @example `{ EXAMPLE: "1", EXAMPLE_2: "2" }`
+ */
 export type DotenvData = Record<string, any>;
 
+/**
+ * Criteria of the filename priority to load as dotenv file
+ * @see https://github.com/marcocesarato/dotenv-mono
+ * @example `{ '.env': 1, '.env.$(NODE_ENV)': 25, '.env.local': 50, '.env.$(NODE_ENV).local': 75 }`
+ */
 export type DotenvPriorities = {[key: string]: number};
 
 export type DotenvArgs = {
+	/**
+	 * Specify the current working directory
+	 * @defaultValue `process.cwd()`
+	 * @example `require('dotenv-mono').dotenvLoad({ cwd: 'latin1' })`
+	 */
 	cwd?: string;
+	/**
+	 * Turn on/off logging to help debug why certain keys or values are not being set as you expect
+	 * @defaultValue `false`
+	 * @example `require('dotenv-mono').dotenvLoad({ debug: true })`
+	 */
 	debug?: boolean;
+	/**
+	 * Specify the max depth to reach finding up the folder from the children directory
+	 * @defaultValue `4`
+	 * @example `require('dotenv-mono').dotenvLoad({ depth: 3 })`
+	 */
 	depth?: number;
+	/**
+	 * Specify the encoding of your file containing environment variables
+	 * @defaultValue `utf8`
+	 * @example `require('dotenv-mono').dotenvLoad({ encoding: 'latin1' })`
+	 */
 	encoding?: BufferEncoding;
+	/**
+	 * Turn on/off the dotenv-expand plugin
+	 * @defaultValue `true`
+	 * @example `require('dotenv-mono').dotenvLoad({ expand: false })`
+	 */
 	expand?: boolean;
+	/**
+	 * Specify to load specific dotenv file used only on specific apps/packages (ex. .env.server)
+	 * @example `require('dotenv-mono').dotenvLoad({ extension: 'server' })`
+	 */
 	extension?: string;
+	/**
+	 * Override any environment variables that have already been set on your machine with values from your .env file
+	 * @defaultValue `false`
+	 * @example `require('dotenv-mono').dotenvLoad({ override: true })`
+	 */
 	override?: boolean;
+	/**
+	 * Specify a custom path if your file containing environment variables is located elsewhere
+	 * @example `require('dotenv-mono').dotenvLoad({ path: '../../configs/.env' })`
+	 */
 	path?: string;
+	/**
+	 * Specify the criteria of the filename priority to load as dotenv file
+	 * @see https://github.com/marcocesarato/dotenv-mono
+	 * @defaultValue `{ '.env': 1, '.env.$(NODE_ENV)': 25, '.env.local': 50, '.env.$(NODE_ENV).local': 75 }`
+	 * @example `require('dotenv-mono').dotenvLoad({ priorities: { '.env.overwrite': 100 } })`
+	 */
 	priorities?: DotenvPriorities;
 };
 
+/**
+ * Dotenv controller
+ */
 export class Dotenv {
+	public config: DotenvConfigOutput | undefined;
 	public env: DotenvData = {};
 	public extension: string | undefined;
 	public path: string | undefined;
@@ -60,56 +117,56 @@ export class Dotenv {
 		return this._debug;
 	}
 
-	set debug(value: boolean | undefined) {
+	public set debug(value: boolean | undefined) {
 		if (value != null) this._debug = value;
 	}
 
-	get encoding(): BufferEncoding {
+	public get encoding(): BufferEncoding {
 		return this._encoding;
 	}
 
-	set encoding(value: BufferEncoding | undefined) {
+	public set encoding(value: BufferEncoding | undefined) {
 		if (value != null) this._encoding = value;
 	}
 
-	get expand() {
+	public get expand() {
 		return this._expand;
 	}
 
-	set expand(value: boolean | undefined) {
+	public set expand(value: boolean | undefined) {
 		if (value != null) this._expand = value;
 	}
 
-	get cwd(): string {
+	public get cwd(): string {
 		if (!this._cwd) return process.cwd() ?? "";
 		return this._cwd;
 	}
 
-	set cwd(value: string | undefined) {
+	public set cwd(value: string | undefined) {
 		this._cwd = value ?? "";
 	}
 
-	get depth() {
+	public get depth() {
 		return this._depth;
 	}
 
-	set depth(value: number | undefined) {
+	public set depth(value: number | undefined) {
 		if (value != null) this._depth = value;
 	}
 
-	get override() {
+	public get override() {
 		return this._override;
 	}
 
-	set override(value: boolean | undefined) {
+	public set override(value: boolean | undefined) {
 		if (value != null) this._override = value;
 	}
 
-	get priorities(): DotenvPriorities {
+	public get priorities(): DotenvPriorities {
 		return this._priorities;
 	}
 
-	set priorities(value: DotenvPriorities | undefined) {
+	public set priorities(value: DotenvPriorities | undefined) {
 		this._nodeEnv = process.env.NODE_ENV ?? "development";
 		const ext: string = this.extension ? `.${this.extension}` : "";
 		this._priorities = Object.assign(
@@ -123,38 +180,53 @@ export class Dotenv {
 		);
 	}
 
-	parse<T extends DotenvParseOutput = DotenvParseOutput>(): T {
+	/**
+	 * Parses a string or buffer in the .env file format into an object.
+	 * @see https://docs.dotenv.org
+	 * @returns an object with keys and values based on `src`. example: `{ DB_HOST : 'localhost' }`
+	 */
+	public parse<T extends DotenvParseOutput = DotenvParseOutput>(): T {
 		// @ts-ignore
 		return dotenv.parse.apply(this, Array.from(arguments));
 	}
 
-	load(loadOnProcess: boolean = true): this {
+	/**
+	 * Loads `.env` file contents.
+	 * @param loadOnProcess - load contents inside process
+	 */
+	public load(loadOnProcess: boolean = true): this {
 		const file: string = this.path ?? (this.find() as string);
 		if (fs.existsSync(file)) {
 			if (loadOnProcess) {
-				const config = dotenv.config({
+				this.config = dotenv.config({
 					path: file,
 					debug: this.debug,
 					encoding: this.encoding,
 					override: this.override,
 				});
 				if (this.expand) {
-					this.env = dotenvExpand.expand(config)?.parsed ?? {};
-				} else {
-					this.env = config?.parsed ?? {};
+					this.config = dotenvExpand.expand(this.config);
 				}
+				this.env = this.config?.parsed ?? {};
 			}
 			this.plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
 		}
 		return this;
 	}
 
-	loadFile(): this {
+	/**
+	 * Loads `.env` file contents.
+	 */
+	public loadFile(): this {
 		this.load(false);
 		return this;
 	}
 
-	find(): string | undefined {
+	/**
+	 * Find first `.env` file walking up from cwd directory based on priority criteria.
+	 * @return file matched with higher priority
+	 */
+	public find(): string | undefined {
 		let dotenv: string | undefined;
 		let directory = path.resolve(this.cwd);
 		const {root} = path.parse(directory);
@@ -190,7 +262,11 @@ export class Dotenv {
 		return dotenv;
 	}
 
-	save(changes: DotenvData): this {
+	/**
+	 * Save `.env` file contents.
+	 * @param changes - data to change on the dotenv
+	 */
+	public save(changes: DotenvData): this {
 		if (!this.plain || !this.path) return this;
 
 		// https://github.com/stevenvachon/edit-dotenv
@@ -241,11 +317,21 @@ export class Dotenv {
 		return this;
 	}
 
-	escapeRegExp(string: string): string {
+	/**
+	 * Escape regex
+	 * @param string - string to escape
+	 * @return escaped string
+	 */
+	private escapeRegExp(string: string): string {
 		return string.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
 	}
 }
 
+/**
+ * Load dotenv on process and return instance of Dotenv
+ * @param DotenvArgs props
+ * @return Dotenv
+ */
 export function dotenvLoad(): Dotenv {
 	const dotenv = new Dotenv(...arguments);
 	return dotenv.load();
