@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.0.1...v1.1.0) (2022-11-12)
+
+### Features
+
+-   add load and config shortcuts ([38677e9](https://github.com/marcocesarato/dotenv-mono/commit/38677e98b6b14d6f891014ea87fcb6f2faa2c718))
+
 ### [1.0.1](https://github.com/marcocesarato/dotenv-mono/compare/v1.0.0...v1.0.1) (2022-11-11)
 
 ### Bug Fixes
