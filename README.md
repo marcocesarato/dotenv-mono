@@ -7,7 +7,7 @@
 <br>
 
 [![NPM version](http://img.shields.io/npm/v/dotenv-mono.svg?style=for-the-badge)](http://npmjs.org/package/dotenv-mono)
-[![js-prittier-style](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=for-the-badge)](https://prettier.io/)
+[![js-prettier-style](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=for-the-badge)](https://prettier.io/)
 
 <!--[![Package Quality](https://npm.packagequality.com/shield/dotenv-mono.svg?style=for-the-badge)](https://packagequality.com/#?package=dotenv-mono)-->
 
@@ -17,10 +17,13 @@
 
 #### What is this?
 
-This is a package that permit to load a dotenv even from a children applications or packages of a monorepo.
+To prevent code duplication and enhance re-usability, a centralized configuration including all of your environment variables might be handy.
+Rather of generating a `.env` file for each package, we may utilize a single `.env` file at the project's root.
+
+This is a package that allows monorepo applications and packages to share and load a centralized dotenv.
 It's based over [dotenv](https://github.com/motdotla/dotenv) package.
 
-It contains also some additionals features like manipulations and save of the changes on the dotenv file.
+It also includes some extra features such as manipulation and saving of changes to the dotenv file.
 
 The plugin [dotenv-expand](https://www.npmjs.com/package/dotenv-expand) is enabled by default.
 
@@ -38,18 +41,21 @@ The plugin [dotenv-expand](https://www.npmjs.com/package/dotenv-expand) is enabl
 
 #### How it works?
 
+The package search the first `.env` file, matching with some priority criteria, by walking up the parent directories.
+
 ##### Priorities
 
-This package find up, starting from the current process directory, the first file, that match the best specific
-filename criteria with the higher priority. The depth of the folder, starting from the current process directory,
-overwrite the files upper, having a higher priority.
+Starting from the current process directory, this package finds the first file that matches the best particular filename criteria with the highest priority.
+The greater the depth of the up folder, the lesser its priority.
 
-| Priority | File name                                |
-| -------- | ---------------------------------------- |
-| 75       | .env.{development,production,test}.local |
-| 50       | .env.local                               |
-| 25       | .env.{development,production,test}       |
-| 1        | .env                                     |
+> Note: The allowed values for `NODE_ENV` are usually `test`, `development` and `production`.
+
+| Priority | File name                |
+| -------- | ------------------------ |
+| 75       | `.env.$(NODE_ENV).local` |
+| 50       | `.env.local`             |
+| 25       | `.env.$(NODE_ENV)`       |
+| 1        | `.env`                   |
 
 ###### Example
 
@@ -160,15 +166,15 @@ dotenv.save({
 
 | Setting      | Description                                                                                                     | Default                       |
 | ------------ | --------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `expand`     | Turn on/off the [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) plugin                           | `true`                        |
-| `priorities` | Specify the criteria of the filename priority to load as dotenv file                                            | See [Priorities](#priorities) |
-| `depth`      | Specify the max depth to reach finding up the folder from the children directory                                | `4`                           |
 | `cwd`        | Specify the current working directory                                                                           | `process.cwd()`               |
-| `path`       | Specify a custom path if your file containing environment variables is located elsewhere                        |                               |
-| `extension`  | Specify to load specific dotenv file used only on specific apps/packages (ex. `.env.server...`)                 |                               |
-| `encoding`   | Specify the encoding of your file containing environment variables                                              | `utf8`                        |
 | `debug`      | Turn on/off logging to help debug why certain keys or values are not being set as you expect                    | `false`                       |
+| `depth`      | Specify the max depth to reach finding up the folder from the children directory                                | `4`                           |
+| `encoding`   | Specify the encoding of your file containing environment variables                                              | `utf8`                        |
+| `expand`     | Turn on/off the [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) plugin                           | `true`                        |
+| `extension`  | Specify to load specific dotenv file used only on specific apps/packages (ex. `.env.server...`)                 |                               |
 | `override`   | Override any environment variables that have already been set on your machine with values from your `.env` file | `false`                       |
+| `path`       | Specify a custom path if your file containing environment variables is located elsewhere                        |                               |
+| `priorities` | Specify the criteria of the filename priority to load as dotenv file                                            | See [Priorities](#priorities) |
 
 ### Methods
 
