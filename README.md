@@ -68,7 +68,6 @@ Given the following folder structure with dotenv files:
 ├── .env
 ├── .env.production
 ├── apps
-│   ├── .env
 │   ├── .env.development
 │   ├── web
 │   ├── docs
@@ -82,7 +81,6 @@ Having the following priority order:
 | ----------------------- | -------- | ----- |
 | `.env`                  | 1        | 2     |
 | `.env.production`       | 25       | 2     |
-| `apps/.env`             | 1        | 1     |
 | `apps/.env.development` | 25       | 1     |
 | `apps/docs/.env`        | 1        | 0     |
 | `apps/docs/.env.local`  | 50       | 0     |
@@ -93,7 +91,7 @@ Then we will have the following outcome scenarios:
 | ------------------------- | ------------- | ----------------------- |
 | `/`                       | `development` | `.env`                  |
 | `/`                       | `production`  | `.env.production`       |
-| `apps/web`                | `development` | `apps/.env`             |
+| `apps/web`                | `development` | `.env`                  |
 | `apps/web`                | `development` | `apps/.env.development` |
 | `apps/docs`               | `development` | `apps/docs/.env.local`  |
 
