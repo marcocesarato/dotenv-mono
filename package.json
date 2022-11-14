@@ -86,12 +86,14 @@
 		"nextjs",
 		"next.js",
 		"react",
-		"node",
-		"nodejs",
-		"node.js",
+		"angular",
 		".env",
 		".env.local",
 		".env.development",
-		".env.production"
+		".env.production",
+		"turbo",
+		"turborepo",
+		"shared",
+		"share"
 	]
 }
