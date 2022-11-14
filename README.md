@@ -45,7 +45,7 @@ The package search the first `.env` file, matching with some priority criteria, 
 
 ##### Priorities
 
-Starting from the current process directory, this package finds the first file that matches the best particular filename criteria with the highest priority.
+Starting from the current process directory, this package finds the first file that matches the best filepath and filename criteria with the highest priority.
 The greater the depth of the up folder, the lesser its priority.
 
 The priority can be customized on the configuration with the `priorities` property, see the example below on
@@ -53,7 +53,7 @@ the [usage](#change-priorities) section.
 
 > Note: The allowed values for `NODE_ENV` are usually `test`, `development` and `production`.
 
-| Priority | File name                |
+| Priority | Filename                 |
 | -------- | ------------------------ |
 | 75       | `.env.$(NODE_ENV).local` |
 | 50       | `.env.local`             |
