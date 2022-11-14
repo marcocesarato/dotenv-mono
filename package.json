@@ -12,7 +12,7 @@
 	"bugs": {
 		"url": "https://github.com/marcocesarato/dotenv/issues"
 	},
-	"homepage": "https://marcocesarato.github.io/dotenv/",
+	"homepage": "https://github.com/marcocesarato/dotenv",
 	"license": "GPL-3.0-or-later",
 	"scripts": {
 		"release": "standard-version",
