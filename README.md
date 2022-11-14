@@ -35,7 +35,7 @@ The plugin [dotenv-expand](https://www.npmjs.com/package/dotenv-expand) is enabl
 │   ├── ui-library
 │   ├── other-library
 ├── apps
-│   ├── nextjs
+│   ├── web
 │   ├── docs
 ```
 
@@ -48,6 +48,9 @@ The package search the first `.env` file, matching with some priority criteria, 
 Starting from the current process directory, this package finds the first file that matches the best particular filename criteria with the highest priority.
 The greater the depth of the up folder, the lesser its priority.
 
+The priority can be customized on the configuration with the `priorities` property, see the example below on
+the [usage](#change-priorities) section.
+
 > Note: The allowed values for `NODE_ENV` are usually `test`, `development` and `production`.
 
 | Priority | File name                |
@@ -59,16 +62,40 @@ The greater the depth of the up folder, the lesser its priority.
 
 ###### Example
 
+Given the following folder structure with dotenv files:
+
 ```text
-├── .env            | PRIORITY = 1
-├── apps            | --------------
-│   ├── .env.local  | PRIORITY = 150
-│   ├── nextjs      | --------------
-│   │   ├── .env    | PRIORITY = 201
+├── .env
+├── .env.production
+├── apps
+│   ├── .env
+│   ├── .env.development
+│   ├── web
+│   ├── docs
+│   │   ├── .env
+│   │   ├── .env.local
 ```
 
-They can be customized on the constructor `priorities` property, see the example below on
-the [usage](#change-priorities) section.
+Having the following priority order:
+
+| Path                    | Priority | Depth |
+| ----------------------- | -------- | ----- |
+| `.env`                  | 1        | 2     |
+| `.env.production`       | 25       | 2     |
+| `apps/.env`             | 1        | 1     |
+| `apps/.env.development` | 25       | 1     |
+| `apps/docs/.env`        | 1        | 0     |
+| `apps/docs/.env.local`  | 50       | 0     |
+
+Then we will have the following outcome scenarios:
+
+| Current working directory | Env           | Match                   |
+| ------------------------- | ------------- | ----------------------- |
+| `/`                       | `development` | `.env`                  |
+| `/`                       | `production`  | `.env.production`       |
+| `apps/web`                | `development` | `apps/.env`             |
+| `apps/web`                | `development` | `apps/.env.development` |
+| `apps/docs`               | `development` | `apps/docs/.env.local`  |
 
 ## 📖 Install
 
@@ -83,14 +110,16 @@ Install the library from npm or yarn just running one of the following command l
 For custom advanced configuration of Next.js, you can create a `next.config.js` or `next.config.mjs` file in the root of
 your project directory (next to `package.json`).
 
-Add these lines at the top of the file:
+Add the following line at the top of the file:
 
 ```js
-// Load dotenv-mono
-const {dotenvLoad} = require("dotenv-mono");
-dotenvLoad();
+require("dotenv-mono").load();
+```
 
-/* other */
+###### Example
+
+```js
+require("dotenv-mono").load();
 
 /**
  * @type {import('next').NextConfig}
