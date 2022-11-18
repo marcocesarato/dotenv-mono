@@ -16,7 +16,10 @@ export type DotenvData = Record<string, any>;
  */
 export type DotenvPriorities = {[key: string]: number};
 
-export type DotenvArgs = {
+/**
+ * Configuration settings.
+ */
+export type DotenvConfig = {
 	/**
 	 * Specify the current working directory
 	 * @defaultValue `process.cwd()`
@@ -115,7 +118,7 @@ export class Dotenv {
 		override,
 		path,
 		priorities,
-	}: DotenvArgs = {}) {
+	}: DotenvConfig = {}) {
 		this.cwd = cwd;
 		this.debug = debug;
 		this.depth = depth;
@@ -397,7 +400,7 @@ export class Dotenv {
  * @param props - Configuration
  * @returns Dotenv instance
  */
-export function dotenvLoad(props: DotenvArgs): Dotenv {
+export function dotenvLoad(props: DotenvConfig): Dotenv {
 	const dotenv = new Dotenv(props);
 	return dotenv.load();
 }
@@ -405,14 +408,14 @@ export function dotenvLoad(props: DotenvArgs): Dotenv {
 /**
  * @see dotenvLoad
  */
-export const load: (props: DotenvArgs) => Dotenv = dotenvLoad;
+export const load: (props: DotenvConfig) => Dotenv = dotenvLoad;
 
 /**
  * Load dotenv on process and return the dotenv output
  * @param props - Configuration
  * @returns DotenvConfigOutput
  */
-export function dotenvConfig(props: DotenvArgs): DotenvConfigOutput {
+export function dotenvConfig(props: DotenvConfig): DotenvConfigOutput {
 	const dotenv = new Dotenv(props);
 	return dotenv.load().config as DotenvConfigOutput;
 }
@@ -420,4 +423,4 @@ export function dotenvConfig(props: DotenvArgs): DotenvConfigOutput {
 /**
  * @see dotenvConfig
  */
-export const config: (props: DotenvArgs) => DotenvConfigOutput = dotenvConfig;
+export const config: (props: DotenvConfig) => DotenvConfigOutput = dotenvConfig;
