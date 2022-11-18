@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.2...v1.1.3) (2022-11-18)
+
+### Bug Fixes
+
+-   typo repo name in homepage and bug url of package.json ([413c3c4](https://github.com/marcocesarato/dotenv-mono/commit/413c3c4930da44d99c30f2d6decccdba0a605f0a))
+-   add export default dotenv class ([9bfed27](https://github.com/marcocesarato/dotenv-mono/commit/9bfed27850cd0756636c09244f9df8dd363b84ca))
+-   set accessor properties as private ([afd4df8](https://github.com/marcocesarato/dotenv-mono/commit/afd4df83892510ef13e81052c78269808c880634))
+
 ### [1.1.2](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.1...v1.1.2) (2022-11-18)
 
 ### Bug Fixes
