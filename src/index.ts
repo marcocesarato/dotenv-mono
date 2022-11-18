@@ -424,3 +424,5 @@ export function dotenvConfig(props: DotenvConfig): DotenvConfigOutput {
  * @see dotenvConfig
  */
 export const config: (props: DotenvConfig) => DotenvConfigOutput = dotenvConfig;
+
+export default Dotenv;
