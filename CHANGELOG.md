@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.1...v1.1.2) (2022-11-18)
+
+### Bug Fixes
+
+-   add explicit typing on shortcut functions ([2abe7ff](https://github.com/marcocesarato/dotenv-mono/commit/2abe7ffeee1e54169a6c0d255e19539b4b41bafa))
+
 ### [1.1.1](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.0...v1.1.1) (2022-11-14)
 
 ### Docs
