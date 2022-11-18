@@ -10,9 +10,9 @@
 		"dist"
 	],
 	"bugs": {
-		"url": "https://github.com/marcocesarato/dotenv/issues"
+		"url": "https://github.com/marcocesarato/dotenv-mono/issues"
 	},
-	"homepage": "https://github.com/marcocesarato/dotenv",
+	"homepage": "https://github.com/marcocesarato/dotenv-mono",
 	"license": "GPL-3.0-or-later",
 	"scripts": {
 		"release": "standard-version",
