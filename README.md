@@ -133,63 +133,65 @@ module.exports = nextConfig;
 
 ### Load
 
-#### Standard
+Simple methods to export environment variables from the dotenv into the working process.
+Here are several potential implementation approaches based on your preferences.
 
 ```js
-require("dotenv-mono").load();
+// Inline
+require("dotenv-mono").load(/* config */);
 
-// or
-
+// Using the function
 const {dotenvLoad} = require("dotenv-mono");
-dotenvLoad();
+dotenvLoad(/* config */);
 
-// or
-
+// Using import
 import {dotenvLoad} from "dotenv-mono";
-dotenvLoad();
-```
+const dotenv = dotenvLoad(); // Dotenv instance
 
-#### Using the class
-
-```js
+// Using the class
 const {Dotenv} = require("dotenv-mono");
-const dotenv = new Dotenv();
+const dotenv = new Dotenv(/* config */);
 dotenv.load();
 ```
 
-#### Having the output
+#### Having the dotenv output
 
-If you want to have back directly the output like [dotenv](https://github.com/motdotla/dotenv) package.
+If you need a fast way to replace [dotenv](https://github.com/motdotla/dotenv) package with **dotenv-mono**, and you need also to have a retro-compatible feature, you can have back directly the output like [dotenv](https://github.com/motdotla/dotenv) package using the `config` method.
 
 ```js
-require("dotenv-mono").config();
+// Inline
+const output = require("dotenv-mono").config(/* config */);
+
+// Using the function
+const {dotenvConfig} = require("dotenv-mono");
+const output = dotenvConfig(/* config */);
 ```
 
 ### Load file with extension
 
 ```js
-// Use .dotenv.server or .dotenv.server.local, etc...
-dotenvLoad({extension: "server"});
+// Use `.dotenv.server` or `.dotenv.server.local`, etc...
+load({extension: "server"});
 ```
 
 ### Load specific file
 
 ```js
 // You can specify the file path
-dotenvLoad({path: "../../configs/.env"});
+load({path: "../../configs/.env"});
 ```
 
 ### Load without [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) extension
 
 ```js
-dotenvLoad({expand: false});
+load({expand: false});
 ```
 
 ### Change priorities
 
 ```js
-// If .dotenv.overwrite is present use it with max priority
-dotenvLoad({
+// If `.dotenv.overwrite` is present use it with max priority
+load({
 	priorities: {
 		".env.overwrite": 100,
 	},
@@ -199,8 +201,13 @@ dotenvLoad({
 ### Make changes
 
 ```js
+const dotenv = require("dotenv-mono").load();
+dotenv.save({"MY_ENV_1": "enjoy"});
+
+// Without loading into the working process
+const {Dotenv} = require("dotenv-mono");
 const dotenv = new Dotenv();
-dotenv.loadFile(); // Not loading into process
+dotenv.loadFile(); // Skip loading into the process
 dotenv.save({
 	"MY_ENV_1": "enjoy",
 	"MY_ENV_2": "'enjoy quotes'",
@@ -224,17 +231,20 @@ dotenv.save({
 | `path`       | Specify a custom path if your file containing environment variables is located elsewhere                        |                               |
 | `priorities` | Specify the criteria of the filename priority to load as dotenv file                                            | See [Priorities](#priorities) |
 
-### Methods
+### Dotenv Methods
 
-#### Load
+#### Load Environments
 
 It will read your `.env` file following the criteria, parse the contents, assign it to `process.env`.
+
+> NOTE: This method differs from the previous `load` **function**.
+> In that it requires the configuration to be loaded on the class instance via the constructor.
 
 ```
 public load(loadOnProcess: boolean): Dotenv;
 ```
 
-#### LoadFile
+#### Load File
 
 It will read your `.env` file following the criteria, parse the contents, ready to be read or changed programmatically.
 
