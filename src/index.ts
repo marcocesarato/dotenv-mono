@@ -91,6 +91,18 @@ export class Dotenv {
 	private _priorities: DotenvPriorities = {};
 	private _nodeEnv: string = "";
 
+	/**
+	 * Constructor.
+	 * @param cwd - Current Working Directory
+	 * @param debug - Turn on/off debugging
+	 * @param depth - Max walking up depth
+	 * @param encoding - File encoding
+	 * @param expand - Turn on/off dotenv-expand plugin
+	 * @param extension - Add dotenv extension
+	 * @param override - Override process variables
+	 * @param path - Dotenv path
+	 * @param priorities - Priorities
+	 */
 	constructor({
 		cwd,
 		debug,
@@ -193,6 +205,7 @@ export class Dotenv {
 	/**
 	 * Loads `.env` file contents.
 	 * @param loadOnProcess - load contents inside process
+	 * @returns current instance
 	 */
 	public load(loadOnProcess: boolean = true): this {
 		const file: string = this.path ?? (this.find() as string);
@@ -216,6 +229,7 @@ export class Dotenv {
 
 	/**
 	 * Loads `.env` file contents.
+	 * @returns current instance
 	 */
 	public loadFile(): this {
 		this.load(false);
@@ -224,7 +238,7 @@ export class Dotenv {
 
 	/**
 	 * Find first `.env` file walking up from cwd directory based on priority criteria.
-	 * @return file matched with higher priority
+	 * @returns file matched with higher priority
 	 */
 	public find(): string | undefined {
 		let dotenv: string | undefined;
@@ -265,6 +279,7 @@ export class Dotenv {
 	/**
 	 * Save `.env` file contents.
 	 * @param changes - data to change on the dotenv
+	 * @returns current instance
 	 */
 	public save(changes: DotenvData): this {
 		if (!this.plain || !this.path) return this;
@@ -320,7 +335,7 @@ export class Dotenv {
 	/**
 	 * Escape regex
 	 * @param string - string to escape
-	 * @return escaped string
+	 * @returns escaped string
 	 */
 	private escapeRegExp(string: string): string {
 		return string.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&").replace(/-/g, "\\x2d");
@@ -329,30 +344,30 @@ export class Dotenv {
 
 /**
  * Load dotenv on process and return instance of Dotenv
- * @param DotenvArgs props
- * @return Dotenv
+ * @param props - Configuration
+ * @returns Dotenv instance
  */
-export function dotenvLoad(): Dotenv {
-	const dotenv = new Dotenv(...arguments);
+export function dotenvLoad(props: DotenvArgs): Dotenv {
+	const dotenv = new Dotenv(props);
 	return dotenv.load();
 }
 
 /**
  * @see dotenvLoad
  */
-export const load = dotenvLoad;
+export const load: (props: DotenvArgs) => Dotenv = dotenvLoad;
 
 /**
  * Load dotenv on process and return the dotenv output
- * @param DotenvArgs props
- * @return Dotenv
+ * @param props - Configuration
+ * @returns DotenvConfigOutput
  */
-export function dotenvConfig(): DotenvConfigOutput {
-	const dotenv = new Dotenv(...arguments);
+export function dotenvConfig(props: DotenvArgs): DotenvConfigOutput {
+	const dotenv = new Dotenv(props);
 	return dotenv.load().config as DotenvConfigOutput;
 }
 
 /**
  * @see dotenvConfig
  */
-export const config = dotenvConfig;
+export const config: (props: DotenvArgs) => DotenvConfigOutput = dotenvConfig;
