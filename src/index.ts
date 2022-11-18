@@ -76,20 +76,22 @@ export type DotenvArgs = {
  * Dotenv controller
  */
 export class Dotenv {
+	// Public config properties
 	public config: DotenvConfigOutput | undefined;
 	public env: DotenvData = {};
 	public extension: string | undefined;
 	public path: string | undefined;
 	public plain: string = "";
 
-	private _cwd: string = "";
-	private _debug: boolean = false;
-	private _depth: number = 4;
-	private _encoding: BufferEncoding = "utf8";
-	private _expand: boolean = true;
-	private _override: boolean = false;
-	private _priorities: DotenvPriorities = {};
-	private _nodeEnv: string = "";
+	// Accessor properties
+	#_cwd: string = "";
+	#_debug: boolean = false;
+	#_depth: number = 4;
+	#_encoding: BufferEncoding = "utf8";
+	#_expand: boolean = true;
+	#_override: boolean = false;
+	#_priorities: DotenvPriorities = {};
+	#_nodeEnv: string = "";
 
 	/**
 	 * Constructor.
@@ -125,67 +127,115 @@ export class Dotenv {
 		this.priorities = priorities;
 	}
 
+	/**
+	 * Get debugging.
+	 */
 	get debug() {
-		return this._debug;
+		return this.#_debug;
 	}
 
+	/**
+	 * Set debugging.
+	 * @param value
+	 */
 	public set debug(value: boolean | undefined) {
-		if (value != null) this._debug = value;
+		if (value != null) this.#_debug = value;
 	}
 
+	/**
+	 * Get encoding.
+	 */
 	public get encoding(): BufferEncoding {
-		return this._encoding;
+		return this.#_encoding;
 	}
 
+	/**
+	 * Set encoding.
+	 * @param value
+	 */
 	public set encoding(value: BufferEncoding | undefined) {
-		if (value != null) this._encoding = value;
+		if (value != null) this.#_encoding = value;
 	}
 
+	/**
+	 * Get dotenv-expand plugin enabling.
+	 */
 	public get expand() {
-		return this._expand;
+		return this.#_expand;
 	}
 
+	/**
+	 * Turn on/off dotenv-expand plugin.
+	 */
 	public set expand(value: boolean | undefined) {
-		if (value != null) this._expand = value;
+		if (value != null) this.#_expand = value;
 	}
 
+	/**
+	 * Get current working directory.
+	 */
 	public get cwd(): string {
-		if (!this._cwd) return process.cwd() ?? "";
-		return this._cwd;
+		if (!this.#_cwd) return process.cwd() ?? "";
+		return this.#_cwd;
 	}
 
+	/**
+	 * Set current working directory.
+	 * @param value
+	 */
 	public set cwd(value: string | undefined) {
-		this._cwd = value ?? "";
+		this.#_cwd = value ?? "";
 	}
 
+	/**
+	 * Get depth.
+	 */
 	public get depth() {
-		return this._depth;
+		return this.#_depth;
 	}
 
+	/**
+	 * Set depth.
+	 * @param value
+	 */
 	public set depth(value: number | undefined) {
-		if (value != null) this._depth = value;
+		if (value != null) this.#_depth = value;
 	}
 
+	/**
+	 * Get override.
+	 */
 	public get override() {
-		return this._override;
+		return this.#_override;
 	}
 
+	/**
+	 * Set override.
+	 * @param value
+	 */
 	public set override(value: boolean | undefined) {
-		if (value != null) this._override = value;
+		if (value != null) this.#_override = value;
 	}
 
+	/**
+	 * Get priorities.
+	 */
 	public get priorities(): DotenvPriorities {
-		return this._priorities;
+		return this.#_priorities;
 	}
 
+	/**
+	 * Merge priorities specified with default and check NODE_ENV.
+	 * @param value
+	 */
 	public set priorities(value: DotenvPriorities | undefined) {
-		this._nodeEnv = process.env.NODE_ENV ?? "development";
+		this.#_nodeEnv = process.env.NODE_ENV ?? "development";
 		const ext: string = this.extension ? `.${this.extension}` : "";
-		this._priorities = Object.assign(
+		this.#_priorities = Object.assign(
 			{
-				[`.env${ext}.${this._nodeEnv}.local`]: 75,
+				[`.env${ext}.${this.#_nodeEnv}.local`]: 75,
 				[`.env${ext}.local`]: 50,
-				[`.env${ext}.${this._nodeEnv}`]: 25,
+				[`.env${ext}.${this.#_nodeEnv}`]: 25,
 				[`.env${ext}`]: 1,
 			},
 			value ?? {},
