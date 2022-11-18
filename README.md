@@ -138,19 +138,19 @@ Here are several potential implementation approaches based on your preferences.
 
 ```js
 // Inline
-require("dotenv-mono").load();
+require("dotenv-mono").load(/* config */);
 
 // Using the function
 const {dotenvLoad} = require("dotenv-mono");
-dotenvLoad(); // It returns a Dotenv class instance
+dotenvLoad(/* config */);
 
 // Using import
 import {dotenvLoad} from "dotenv-mono";
-const dotenv = dotenvLoad(); // with variable assignment
+const dotenv = dotenvLoad(); // Dotenv instance
 
 // Using the class
 const {Dotenv} = require("dotenv-mono");
-const dotenv = new Dotenv();
+const dotenv = new Dotenv(/* config */);
 dotenv.load();
 ```
 
@@ -160,17 +160,17 @@ If you need a fast way to replace [dotenv](https://github.com/motdotla/dotenv) p
 
 ```js
 // Inline
-const output = require("dotenv-mono").config();
+const output = require("dotenv-mono").config(/* config */);
 
 // Using the function
 const {dotenvConfig} = require("dotenv-mono");
-const output = dotenvConfig();
+const output = dotenvConfig(/* config */);
 ```
 
 ### Load file with extension
 
 ```js
-// Use .dotenv.server or .dotenv.server.local, etc...
+// Use `.dotenv.server` or `.dotenv.server.local`, etc...
 load({extension: "server"});
 ```
 
@@ -190,7 +190,7 @@ load({expand: false});
 ### Change priorities
 
 ```js
-// If .dotenv.overwrite is present use it with max priority
+// If `.dotenv.overwrite` is present use it with max priority
 load({
 	priorities: {
 		".env.overwrite": 100,
@@ -231,17 +231,20 @@ dotenv.save({
 | `path`       | Specify a custom path if your file containing environment variables is located elsewhere                        |                               |
 | `priorities` | Specify the criteria of the filename priority to load as dotenv file                                            | See [Priorities](#priorities) |
 
-### Methods
+### Dotenv Methods
 
-#### Load
+#### Load Environments
 
 It will read your `.env` file following the criteria, parse the contents, assign it to `process.env`.
+
+> NOTE: This method differs from the previous `load` **function**.
+> In that it requires the configuration to be loaded on the class instance via the constructor.
 
 ```
 public load(loadOnProcess: boolean): Dotenv;
 ```
 
-#### LoadFile
+#### Load File
 
 It will read your `.env` file following the criteria, parse the contents, ready to be read or changed programmatically.
 
