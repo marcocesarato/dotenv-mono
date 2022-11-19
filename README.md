@@ -129,6 +129,28 @@ const nextConfig = {
 module.exports = nextConfig;
 ```
 
+### Install on Storybook
+
+The main configuration file is `.storybook/main.js`. This file controls the Storybook server's behavior, so you must restart Storybook’s process when you change it.
+
+Add the following lines on the file:
+
+```js
+const dotenv = require("dotenv-mono").load();
+
+const config = {
+  /* config options here */
+  env: (config) => {
+    return {
+      ...config,
+      ...dotenv.env,
+    };
+  },
+};
+
+module.exports = config;
+```
+
 ## 💻 Usage
 
 ### Load
