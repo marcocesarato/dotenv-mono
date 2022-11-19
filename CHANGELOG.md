@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.4](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.3...v1.1.4) (2022-11-19)
+
+### Bug Fixes
+
+-   add config props nullable ([62393f0](https://github.com/marcocesarato/dotenv-mono/commit/62393f04a45d30081351bb0bd5d56f0f7c72a2d5))
+
 ### [1.1.3](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.2...v1.1.3) (2022-11-18)
 
 ### Bug Fixes
