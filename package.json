@@ -93,6 +93,7 @@
 		".env.production",
 		"turbo",
 		"turborepo",
+		"storybook",
 		"shared",
 		"share"
 	]
