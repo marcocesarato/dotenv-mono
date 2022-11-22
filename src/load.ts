@@ -1,3 +1,8 @@
-import {dotenvLoad} from "./index";
+import {load} from "./index";
+import {runCli} from "./cli";
 
-dotenvLoad();
+(function () {
+	runCli(load);
+})();
+
+export {};

@@ -6,6 +6,15 @@
 	"types": "./dist/index.d.ts",
 	"description": "This is a package that permit to load a dotenv even from a children applications or packages of a monorepo. It contains also some additionals features like manipulations and save of the changes on the dotenv file.",
 	"author": "Marco Cesarato <cesarato.developer@gmail.com>",
+	"exports": {
+		".": {
+			"default": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./load": "./dist/load.js",
+		"./package.json": "./package.json"
+	},
 	"files": [
 		"dist"
 	],
