@@ -4,23 +4,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [1.3.2](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.2...v1.3.2) (2022-11-22)
 
-### Features
-
--   add defaults dotenv config and matcher ([836ce8f](https://github.com/marcocesarato/dotenv-mono/commit/836ce8f0004da73c5efa92a93c3382def5534b9f))
--   add file to load dotenv files with require ([885b74e](https://github.com/marcocesarato/dotenv-mono/commit/885b74e77266633b6a84ae1c09778cb9b45159a2)), closes [#2](https://github.com/marcocesarato/dotenv-mono/issues/2)
--   add options as parameters on cli usage method ([d5c62c8](https://github.com/marcocesarato/dotenv-mono/commit/d5c62c8420dae829e69c4fe27be242272a8f27c3))
--   load defaults dotenv file ([830079b](https://github.com/marcocesarato/dotenv-mono/commit/830079bf544e0c4f0d0c0d6b458175735cd394e9))
-
 ### Bug Fixes
 
--   :pencil2: typo repo name in homepage and bug url of package.json ([413c3c4](https://github.com/marcocesarato/dotenv-mono/commit/413c3c4930da44d99c30f2d6decccdba0a605f0a))
--   add config props nullable ([5c1517c](https://github.com/marcocesarato/dotenv-mono/commit/5c1517c255cb361c13408dffda7223126d168751))
--   add encoding string typing and casting ([07bf672](https://github.com/marcocesarato/dotenv-mono/commit/07bf672a93a57cc90189111bbd7e13c7bb59870c))
--   add export default dotenv class ([9bfed27](https://github.com/marcocesarato/dotenv-mono/commit/9bfed27850cd0756636c09244f9df8dd363b84ca))
--   improve cli option parsing and type detection ([a1b5d44](https://github.com/marcocesarato/dotenv-mono/commit/a1b5d444a311018b4ec52ec7e7846b3846103cec))
--   load dotenv on process with defaults ([a3ded37](https://github.com/marcocesarato/dotenv-mono/commit/a3ded372e7d46fce183c1f6fa6f8ee4df1e3b89a))
 -   parse typing ([81ccfbd](https://github.com/marcocesarato/dotenv-mono/commit/81ccfbd1e1496f15c978e02f9382c24e61a4bca5))
--   set accessor properties as private ([afd4df8](https://github.com/marcocesarato/dotenv-mono/commit/afd4df83892510ef13e81052c78269808c880634))
 
 ### [1.3.1](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.0...v1.3.1) (2022-11-22)
 
