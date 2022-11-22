@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.1](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.0...v1.3.1) (2022-11-22)
+
+### Bug Fixes
+
+-   add encoding string typing and casting ([f583e53](https://github.com/marcocesarato/dotenv-mono/commit/f583e53969c0a2e77f1441ce6d1b10b3f247cb71))
+-   improve cli option parsing and type detection ([b77d9fa](https://github.com/marcocesarato/dotenv-mono/commit/b77d9fafc6c64bc413b501a4fa6fd6e895ec58f5))
+
 ## [1.3.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.2.0...v1.3.0) (2022-11-22)
 
 ### Features
