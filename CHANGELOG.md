@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.2...v1.3.2) (2022-11-22)
+
+### Bug Fixes
+
+-   parse typing ([81ccfbd](https://github.com/marcocesarato/dotenv-mono/commit/81ccfbd1e1496f15c978e02f9382c24e61a4bca5))
+
 ### [1.3.1](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.0...v1.3.1) (2022-11-22)
 
 ### Bug Fixes
