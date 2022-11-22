@@ -23,7 +23,7 @@ Rather of generating a `.env` file for each package, we may utilize a single `.e
 This is a package that allows monorepo applications and packages to share and load a centralized dotenv.
 It's based over [dotenv](https://github.com/motdotla/dotenv) package.
 
-It also includes some extra features such as manipulation and saving of changes to the dotenv file.
+It also includes some extra features such as manipulation and saving of changes to the dotenv file, a default centralized file, and a file loader with ordering and priorities.
 
 The plugin [dotenv-expand](https://www.npmjs.com/package/dotenv-expand) is enabled by default.
 
@@ -31,11 +31,14 @@ The plugin [dotenv-expand](https://www.npmjs.com/package/dotenv-expand) is enabl
 
 ```text
 ├── .env
+├── .env.production
+├── .env.defaults
 ├── packages
 │   ├── ui-library
 │   ├── other-library
 ├── apps
 │   ├── web
+│   │   ├── .storybook
 │   ├── docs
 ```
 
@@ -139,13 +142,13 @@ Add the following lines on the file:
 const dotenv = require("dotenv-mono").load();
 
 const config = {
-  /* config options here */
-  env: (config) => {
-    return {
-      ...config,
-      ...dotenv.env,
-    };
-  },
+	/* config options here */
+	env: (config) => {
+		return {
+			...config,
+			...dotenv.env,
+		};
+	},
 };
 
 module.exports = config;
@@ -209,6 +212,12 @@ load({path: "../../configs/.env"});
 load({expand: false});
 ```
 
+### Change default filename
+
+```js
+load({defaults: ".env.def"});
+```
+
 ### Change priorities
 
 ```js
@@ -245,6 +254,7 @@ dotenv.save({
 | ------------ | --------------------------------------------------------------------------------------------------------------- | ----------------------------- |
 | `cwd`        | Specify the current working directory                                                                           | `process.cwd()`               |
 | `debug`      | Turn on/off logging to help debug why certain keys or values are not being set as you expect                    | `false`                       |
+| `defaults`   | Specify the defaults dotenv filename (it **can't** override any environment variables)                          | `.env.defaults`               |
 | `depth`      | Specify the max depth to reach finding up the folder from the children directory                                | `4`                           |
 | `encoding`   | Specify the encoding of your file containing environment variables                                              | `utf8`                        |
 | `expand`     | Turn on/off the [`dotenv-expand`](https://www.npmjs.com/package/dotenv-expand) plugin                           | `true`                        |

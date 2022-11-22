@@ -66,6 +66,9 @@
 		"monorepo",
 		"dotenv",
 		"dotenv-expand",
+		"expand",
+		"vars",
+		"variables",
 		"load",
 		"loader",
 		"mono",
@@ -95,6 +98,8 @@
 		"turborepo",
 		"storybook",
 		"shared",
-		"share"
+		"share",
+		"default",
+		"defaults"
 	]
 }
