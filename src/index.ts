@@ -17,57 +17,77 @@ export type DotenvData = Record<string, any>;
 export type DotenvPriorities = {[key: string]: number};
 
 /**
+ * Dotenv matcher result.
+ * @example `{ foundDotenv: './', foundDotenv: './.env' }`
+ */
+export type DotenvMatcherResult = {
+	foundPath: string | null | undefined;
+	foundDotenv: string | null | undefined;
+};
+
+/**
+ * Dotenv matcher.
+ */
+export type DotenvMatcher = (dotenv: string | null | undefined, cwd: string) => DotenvMatcherResult;
+
+/**
  * Configuration settings.
  */
 export type DotenvConfig = {
 	/**
-	 * Specify the current working directory
+	 * Specify the current working directory.
 	 * @defaultValue `process.cwd()`
 	 * @example `require('dotenv-mono').load({ cwd: 'latin1' })`
 	 */
 	cwd?: string;
 	/**
-	 * Turn on/off logging to help debug why certain keys or values are not being set as you expect
+	 * Turn on/off logging to help debug why certain keys or values are not being set as you expect.
 	 * @defaultValue `false`
 	 * @example `require('dotenv-mono').load({ debug: true })`
 	 */
 	debug?: boolean;
 	/**
-	 * Specify the max depth to reach finding up the folder from the children directory
+	 * Specify the defaults dotenv filename.
+	 * @defaultValue `.env.defaults`
+	 * @example `require('dotenv-mono').load({ defaults: '.env.default' })`
+	 */
+	defaults?: string;
+	/**
+	 * Specify the max depth to reach finding up the folder from the children directory.
 	 * @defaultValue `4`
 	 * @example `require('dotenv-mono').load({ depth: 3 })`
 	 */
 	depth?: number;
 	/**
-	 * Specify the encoding of your file containing environment variables
+	 * Specify the encoding of your file containing environment variables.
 	 * @defaultValue `utf8`
 	 * @example `require('dotenv-mono').load({ encoding: 'latin1' })`
 	 */
 	encoding?: BufferEncoding;
 	/**
-	 * Turn on/off the dotenv-expand plugin
+	 * Turn on/off the dotenv-expand plugin.
 	 * @defaultValue `true`
 	 * @example `require('dotenv-mono').load({ expand: false })`
 	 */
 	expand?: boolean;
 	/**
-	 * Specify to load specific dotenv file used only on specific apps/packages (ex. .env.server)
+	 * Specify to load specific dotenv file used only on specific apps/packages (ex. .env.server).
 	 * @example `require('dotenv-mono').load({ extension: 'server' })`
 	 */
 	extension?: string;
 	/**
-	 * Override any environment variables that have already been set on your machine with values from your .env file
+	 * Override any environment variables that have already been set on your machine with values from your .env file.
 	 * @defaultValue `false`
 	 * @example `require('dotenv-mono').load({ override: true })`
 	 */
 	override?: boolean;
 	/**
-	 * Specify a custom path if your file containing environment variables is located elsewhere
+	 * Specify a custom path if your file containing environment variables is located elsewhere.
 	 * @example `require('dotenv-mono').load({ path: '../../configs/.env' })`
 	 */
 	path?: string;
 	/**
-	 * Specify the criteria of the filename priority to load as dotenv file
+	 * Specify the criteria of the filename priority to load as dotenv file.
 	 * @see https://github.com/marcocesarato/dotenv-mono
 	 * @defaultValue `{ '.env': 1, '.env.$(NODE_ENV)': 25, '.env.local': 50, '.env.$(NODE_ENV).local': 75 }`
 	 * @example `require('dotenv-mono').load({ priorities: { '.env.overwrite': 100 } })`
@@ -76,7 +96,7 @@ export type DotenvConfig = {
 };
 
 /**
- * Dotenv controller
+ * Dotenv controller.
  */
 export class Dotenv {
 	// Public config properties
@@ -89,6 +109,7 @@ export class Dotenv {
 	// Accessor properties
 	#_cwd: string = "";
 	#_debug: boolean = false;
+	#_defaults: string = ".env.defaults";
 	#_depth: number = 4;
 	#_encoding: BufferEncoding = "utf8";
 	#_expand: boolean = true;
@@ -98,19 +119,20 @@ export class Dotenv {
 
 	/**
 	 * Constructor.
-	 * @param cwd - Current Working Directory
-	 * @param debug - Turn on/off debugging
-	 * @param depth - Max walking up depth
-	 * @param encoding - File encoding
-	 * @param expand - Turn on/off dotenv-expand plugin
-	 * @param extension - Add dotenv extension
-	 * @param override - Override process variables
-	 * @param path - Dotenv path
-	 * @param priorities - Priorities
+	 * @param cwd - current Working Directory
+	 * @param debug - turn on/off debugging
+	 * @param depth - max walking up depth
+	 * @param encoding - file encoding
+	 * @param expand - turn on/off dotenv-expand plugin
+	 * @param extension - add dotenv extension
+	 * @param override - override process variables
+	 * @param path - dotenv path
+	 * @param priorities - priorities
 	 */
 	constructor({
 		cwd,
 		debug,
+		defaults,
 		depth,
 		encoding,
 		expand,
@@ -121,6 +143,7 @@ export class Dotenv {
 	}: DotenvConfig = {}) {
 		this.cwd = cwd;
 		this.debug = debug;
+		this.defaults = defaults;
 		this.depth = depth;
 		this.encoding = encoding;
 		this.expand = expand;
@@ -133,7 +156,7 @@ export class Dotenv {
 	/**
 	 * Get debugging.
 	 */
-	get debug() {
+	get debug(): boolean {
 		return this.#_debug;
 	}
 
@@ -143,6 +166,21 @@ export class Dotenv {
 	 */
 	public set debug(value: boolean | undefined) {
 		if (value != null) this.#_debug = value;
+	}
+
+	/**
+	 * Get defaults filename.
+	 */
+	get defaults(): string {
+		return this.#_defaults;
+	}
+
+	/**
+	 * Set defaults filename.
+	 * @param value
+	 */
+	public set defaults(value: string | undefined) {
+		if (value != null) this.#_defaults = value;
 	}
 
 	/**
@@ -163,7 +201,7 @@ export class Dotenv {
 	/**
 	 * Get dotenv-expand plugin enabling.
 	 */
-	public get expand() {
+	public get expand(): boolean {
 		return this.#_expand;
 	}
 
@@ -193,7 +231,7 @@ export class Dotenv {
 	/**
 	 * Get depth.
 	 */
-	public get depth() {
+	public get depth(): number {
 		return this.#_depth;
 	}
 
@@ -208,7 +246,7 @@ export class Dotenv {
 	/**
 	 * Get override.
 	 */
-	public get override() {
+	public get override(): boolean {
 		return this.#_override;
 	}
 
@@ -293,40 +331,71 @@ export class Dotenv {
 	 * Find first `.env` file walking up from cwd directory based on priority criteria.
 	 * @returns file matched with higher priority
 	 */
-	public find(): string | undefined {
-		let dotenv: string | undefined;
+	public find(matcher?: DotenvMatcher): string | null | undefined {
+		if (!matcher) matcher = this.dotenvMatcher.bind(this);
+		let dotenv: string | null | undefined = null;
 		let directory = path.resolve(this.cwd);
 		const {root} = path.parse(directory);
-		const matcher = (cwd: string) => {
-			const priority = -1;
-			Object.keys(this.priorities).forEach((fileName) => {
-				if (
-					this.priorities[fileName] > priority &&
-					fs.existsSync(path.join(cwd, fileName))
-				) {
-					dotenv = path.join(cwd, fileName);
-				}
-			});
-			const foundPath = dotenv != null ? cwd : null;
-			if (typeof foundPath === "string") {
-				try {
-					const stat = fs.statSync(path.resolve(cwd, foundPath));
-					if (stat.isDirectory()) return foundPath;
-				} catch {}
-			}
-			return foundPath;
-		};
 		let depth = 0;
 		let match = false;
 		while (this.depth ? depth < this.depth : true) {
 			depth++;
-			const foundPath = matcher(directory);
+			const {foundPath, foundDotenv} = matcher(dotenv, directory);
+			dotenv = foundDotenv;
 			if (match) break;
 			if (foundPath) match = true;
 			if (directory === root) break;
 			directory = path.dirname(directory);
 		}
 		return dotenv;
+	}
+
+	/**
+	 * Dotenv matcher.
+	 * @private
+	 * @param dotenv - dotenv result
+	 * @param cwd - current working directory
+	 * @returns paths found
+	 */
+	private dotenvMatcher(dotenv: string | null | undefined, cwd: string): DotenvMatcherResult {
+		const priority = -1;
+		Object.keys(this.priorities).forEach((fileName) => {
+			if (this.priorities[fileName] > priority && fs.existsSync(path.join(cwd, fileName))) {
+				dotenv = path.join(cwd, fileName);
+			}
+		});
+		const foundPath = dotenv != null ? cwd : null;
+		if (typeof foundPath === "string") {
+			try {
+				const stat = fs.statSync(path.resolve(cwd, foundPath));
+				if (stat.isDirectory()) return {foundPath, foundDotenv: dotenv};
+			} catch {}
+		}
+		return {foundPath, foundDotenv: dotenv};
+	}
+
+	/**
+	 * Defaults dotenv matcher.
+	 * @private
+	 * @param dotenv - dotenv result
+	 * @param cwd - current working directory
+	 * @returns paths found
+	 */
+	private dotenvDefaultsMatcher(
+		dotenv: string | null | undefined,
+		cwd: string,
+	): DotenvMatcherResult {
+		if (fs.existsSync(path.join(cwd, this.defaults))) {
+			dotenv = path.join(cwd, this.defaults);
+		}
+		const foundPath = dotenv != null ? cwd : null;
+		if (typeof foundPath === "string") {
+			try {
+				const stat = fs.statSync(path.resolve(cwd, foundPath));
+				if (stat.isDirectory()) return {foundPath, foundDotenv: dotenv};
+			} catch {}
+		}
+		return {foundPath, foundDotenv: dotenv};
 	}
 
 	/**
@@ -386,7 +455,7 @@ export class Dotenv {
 	}
 
 	/**
-	 * Escape regex
+	 * Escape regex.
 	 * @param string - string to escape
 	 * @returns escaped string
 	 */
@@ -396,8 +465,8 @@ export class Dotenv {
 }
 
 /**
- * Load dotenv on process and return instance of Dotenv
- * @param props - Configuration
+ * Load dotenv on process and return instance of Dotenv.
+ * @param props - configuration
  * @returns Dotenv instance
  */
 export function dotenvLoad(props?: DotenvConfig): Dotenv {
@@ -411,8 +480,8 @@ export function dotenvLoad(props?: DotenvConfig): Dotenv {
 export const load: (props?: DotenvConfig) => Dotenv = dotenvLoad;
 
 /**
- * Load dotenv on process and return the dotenv output
- * @param props - Configuration
+ * Load dotenv on process and return the dotenv output.
+ * @param props - configuration
  * @returns DotenvConfigOutput
  */
 export function dotenvConfig(props?: DotenvConfig): DotenvConfigOutput {
