@@ -334,7 +334,7 @@ export class Dotenv {
 				encoding: this.encoding,
 				override: !defaults && this.override,
 			});
-			if (this.expand) config = dotenvExpand.expand(this.config);
+			if (this.expand) config = dotenvExpand.expand(config);
 			this.mergeDotenvConfig(config);
 		}
 		if (!defaults) this.plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
