@@ -291,9 +291,8 @@ export class Dotenv {
 	 * @see https://docs.dotenv.org
 	 * @returns an object with keys and values based on `src`. example: `{ DB_HOST : 'localhost' }`
 	 */
-	public parse<T extends DotenvParseOutput = DotenvParseOutput>(): T {
-		// @ts-ignore
-		return dotenv.parse.apply(this, Array.from(arguments));
+	public parse(src: string | Buffer): DotenvParseOutput {
+		return dotenv.parse(src);
 	}
 
 	/**
