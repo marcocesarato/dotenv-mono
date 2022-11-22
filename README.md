@@ -270,7 +270,6 @@ $ DOTENV_CONFIG_<OPTION>=value node -r dotenv-mono/load your_script.js
 $ DOTENV_CONFIG_ENCODING=latin1 DOTENV_CONFIG_DEBUG=true node -r dotenv-mono/load your_script.js dotenv_config_path=/custom/path/to/.env
 ```
 
-
 ## 💡 Methods
 
 ### Config

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.2.0...v1.3.0) (2022-11-22)
+
+### Features
+
+-   add file to load dotenv files with require ([c27232b](https://github.com/marcocesarato/dotenv-mono/commit/c27232b28e9bc901ca1d0037a83f01f47718c232)), closes [#2](https://github.com/marcocesarato/dotenv-mono/issues/2)
+-   add options as parameters on cli usage method ([3b23fc2](https://github.com/marcocesarato/dotenv-mono/commit/3b23fc2367c700337a1dc3fc0e400a192f9f0802))
+
 ## [1.2.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.4...v1.2.0) (2022-11-22)
 
 ### Features
