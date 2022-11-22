@@ -63,7 +63,7 @@ export type DotenvConfig = {
 	 * @defaultValue `utf8`
 	 * @example `require('dotenv-mono').load({ encoding: 'latin1' })`
 	 */
-	encoding?: BufferEncoding;
+	encoding?: BufferEncoding | string;
 	/**
 	 * Turn on/off the dotenv-expand plugin.
 	 * @defaultValue `true`
@@ -197,8 +197,8 @@ export class Dotenv {
 	 * Set encoding.
 	 * @param value
 	 */
-	public set encoding(value: BufferEncoding | undefined) {
-		if (value != null) this.#_encoding = value;
+	public set encoding(value: BufferEncoding | string | undefined) {
+		if (value != null) this.#_encoding = value as BufferEncoding;
 	}
 
 	/**
