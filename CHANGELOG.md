@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.4...v1.2.0) (2022-11-22)
+
+### Features
+
+-   add defaults dotenv config and matcher ([b2c9028](https://github.com/marcocesarato/dotenv-mono/commit/b2c902838a763b3fb935b7a17b12f22c528ce8bd))
+-   load defaults dotenv file ([479ecf4](https://github.com/marcocesarato/dotenv-mono/commit/479ecf4de274cbdaf1f51f5cec2e213e7b0fdaaf))
+
+### Bug Fixes
+
+-   load dotenv on process with defaults ([e379f2d](https://github.com/marcocesarato/dotenv-mono/commit/e379f2d7b559b07fececcfd0d2587bf6cb2260ec))
+
 ### [1.1.4](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.3...v1.1.4) (2022-11-19)
 
 ### Bug Fixes
