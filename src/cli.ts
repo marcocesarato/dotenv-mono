@@ -73,8 +73,8 @@ export function runCli(runner: Function) {
 	const cliOptions = args.reduce(function (opts, cur) {
 		const matches = cur.match(re);
 		if (matches) {
-			const option: any = String(matches[1]).trim();
-			const match: any = String(matches[2]).trim();
+			const option = String(matches[1]).trim();
+			const match = String(matches[2]).trim();
 			opts[option] = parseOption(match, DotenvOptionsType[option]);
 		}
 		return opts;
