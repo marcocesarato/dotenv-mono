@@ -100,7 +100,7 @@ export type DotenvConfig = {
  */
 export class Dotenv {
 	// Public config properties
-	public config: DotenvConfigOutput | undefined;
+	public config: DotenvConfigOutput = {};
 	public env: DotenvData = {};
 	public extension: string | undefined;
 	public path: string | undefined;
@@ -151,6 +151,9 @@ export class Dotenv {
 		this.override = override;
 		this.path = path;
 		this.priorities = priorities;
+		// Auto-bind matchers
+		this.dotenvDefaultsMatcher = this.dotenvDefaultsMatcher.bind(this);
+		this.dotenvMatcher = this.dotenvMatcher.bind(this);
 	}
 
 	/**
@@ -294,28 +297,60 @@ export class Dotenv {
 	}
 
 	/**
-	 * Loads `.env` file contents.
+	 * Loads `.env` and default file contents.
 	 * @param loadOnProcess - load contents inside process
 	 * @returns current instance
 	 */
 	public load(loadOnProcess: boolean = true): this {
-		const file: string = this.path ?? (this.find() as string);
-		if (fs.existsSync(file)) {
-			if (loadOnProcess) {
-				this.config = dotenv.config({
-					path: file,
-					debug: this.debug,
-					encoding: this.encoding,
-					override: this.override,
-				});
-				if (this.expand) {
-					this.config = dotenvExpand.expand(this.config);
-				}
-				this.env = this.config?.parsed ?? {};
-			}
-			this.plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
-		}
+		// Reset
+		this.env = {};
+		this.config = {};
+		// Load dotenv source file
+		const file = this.path ?? this.find();
+		this.loadDotenv(file, loadOnProcess);
+		// Load default without override the source file
+		const defaultFile = this.find(this.dotenvDefaultsMatcher);
+		this.loadDotenv(defaultFile, loadOnProcess, true);
 		return this;
+	}
+
+	/**
+	 * Load with dotenv package and set parsed and plain content into the instance.
+	 * @private
+	 * @param file - path to dotenv
+	 * @param loadOnProcess - load contents inside process
+	 * @param defaults - is the default dotenv
+	 */
+	private loadDotenv(
+		file: string | null | undefined,
+		loadOnProcess: boolean,
+		defaults: boolean = false,
+	): void {
+		if (!file || !fs.existsSync(file)) return;
+		if (loadOnProcess) {
+			let config = dotenv.config({
+				path: file,
+				debug: this.debug,
+				encoding: this.encoding,
+				override: !defaults && this.override,
+			});
+			if (this.expand) config = dotenvExpand.expand(this.config);
+			this.mergeDotenvConfig(config);
+		}
+		if (!defaults) this.plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
+	}
+
+	/**
+	 * Merge dotenv package configs.
+	 * @private
+	 * @param config - dotenv config
+	 */
+	private mergeDotenvConfig(config: DotenvConfigOutput): void {
+		this.config = {
+			parsed: {...(this.config.parsed ?? {}), ...(config.parsed ?? {})},
+			error: this.config.error ?? config.error ?? undefined,
+		};
+		this.env = {...this.env, ...(this.config.parsed ?? {})};
 	}
 
 	/**
@@ -332,7 +367,7 @@ export class Dotenv {
 	 * @returns file matched with higher priority
 	 */
 	public find(matcher?: DotenvMatcher): string | null | undefined {
-		if (!matcher) matcher = this.dotenvMatcher.bind(this);
+		if (!matcher) matcher = this.dotenvMatcher;
 		let dotenv: string | null | undefined = null;
 		let directory = path.resolve(this.cwd);
 		const {root} = path.parse(directory);
