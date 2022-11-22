@@ -17,10 +17,11 @@
 		"strict": true,
 		"sourceMap": true,
 		"target": "es6",
+		"types": ["@types/node" ,"@types/jest"],
 		"module": "commonjs",
 		"outDir": "./dist",
 		"baseUrl": "./src"
 	},
 	"include": ["src"],
-	"exclude": ["node_modules", "./dist/**/*.js", "./dist/**/*.ts"]
+	"exclude": ["node_modules", "./dist/**/*.js", "./dist/**/*.ts", "./dist/**/*.test.ts"]
 }
