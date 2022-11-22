@@ -1,73 +1,83 @@
 import {DotenvConfig} from "./index";
 
 /**
+ * Generic object.
+ */
+type GenericObject<T = any> = {[key: string]: T};
+
+/**
+ * Configuration option types.
+ */
+enum OptionType {
+	boolean,
+	number,
+	string,
+	object,
+	array,
+}
+
+/**
+ * List of all Dotenv configuration options type.
+ */
+const DotenvOptionsType: GenericObject<OptionType> = {
+	cwd: OptionType.string,
+	debug: OptionType.boolean,
+	defaults: OptionType.string,
+	depth: OptionType.number,
+	encoding: OptionType.string,
+	expand: OptionType.boolean,
+	extension: OptionType.string,
+	path: OptionType.string,
+	override: OptionType.boolean,
+	priorities: OptionType.object,
+};
+
+/**
+ * Parse CLI parameter type.
+ * @param option - value to parse
+ * @param type - value type
+ * @returns parsed option
+ */
+function parseOption(option: string | undefined, type: OptionType): any {
+	if (option === undefined) return option;
+	if (type === OptionType.number) return Number(option);
+	if (type === OptionType.boolean) return option === "true";
+	if (type === OptionType.object) {
+		try {
+			return JSON.parse(option);
+		} catch (e) {
+			console.error(e);
+		}
+	}
+	return option;
+}
+
+/**
  * Run CLI Dotenv runners.
  * @param runner
  */
 export function runCli(runner: Function) {
 	// Empty options
-	const options: DotenvConfig = {
-		cwd: undefined,
-		debug: undefined,
-		defaults: undefined,
-		depth: undefined,
-		encoding: undefined,
-		expand: undefined,
-		extension: undefined,
-		path: undefined,
-		override: undefined,
-		priorities: undefined,
-	};
+	const options: GenericObject = {};
 	// Environment configuration
-	if (process.env.DOTENV_CONFIG_CWD != null) {
-		options.cwd = process.env.DOTENV_CONFIG_CWD;
-	}
-	if (process.env.DOTENV_CONFIG_DEBUG != null) {
-		options.debug = process.env.DOTENV_CONFIG_DEBUG === "true";
-	}
-	if (process.env.DOTENV_CONFIG_DEFAULTS != null) {
-		options.defaults = process.env.DOTENV_CONFIG_DEFAULTS;
-	}
-	if (process.env.DOTENV_CONFIG_DEPTH != null) {
-		options.depth = Number(process.env.DOTENV_CONFIG_DEPTH);
-	}
-	if (process.env.DOTENV_CONFIG_ENCODING != null) {
-		options.encoding = process.env.DOTENV_CONFIG_ENCODING as BufferEncoding;
-	}
-	if (process.env.DOTENV_CONFIG_EXPAND != null) {
-		options.expand = process.env.DOTENV_CONFIG_EXPAND === "true";
-	}
-	if (process.env.DOTENV_CONFIG_EXTENSION != null) {
-		options.extension = process.env.DOTENV_CONFIG_EXTENSION;
-	}
-	if (process.env.DOTENV_CONFIG_PATH != null) {
-		options.path = process.env.DOTENV_CONFIG_PATH;
-	}
-	if (process.env.DOTENV_CONFIG_OVERRIDE != null) {
-		options.override = process.env.DOTENV_CONFIG_OVERRIDE === "true";
-	}
-	if (process.env.DOTENV_CONFIG_PRIORITIES != null) {
-		try {
-			options.priorities = JSON.parse(process.env.DOTENV_CONFIG_PRIORITIES);
-		} catch (e) {
-			console.error(e);
+	Object.keys(DotenvOptionsType).forEach((option) => {
+		const envName = "DOTENV_CONFIG_" + option.toUpperCase();
+		if (process.env[envName] != null) {
+			options[option] = parseOption(process.env[envName], DotenvOptionsType[option]);
 		}
-	}
+	});
 	// CLI Parameter configuration parser
 	const args: string[] = process.argv;
 	const keys: string = Object.keys(options).join("|");
 	const re = new RegExp(`^dotenv_config_(${keys})=(.+)$`, "g");
-	const cliOptions = args.reduce(function (acc, cur) {
+	const cliOptions = args.reduce(function (opts, cur) {
 		const matches = cur.match(re);
 		if (matches) {
-			let match: any = String(matches[2]).trim();
-			const isBoolean = match === "true" || match === "false";
-			if (isBoolean) {
-				match = match === "true";
-			}
-			acc[String(matches[1])] = match;
+			const option: any = String(matches[1]).trim();
+			const match: any = String(matches[2]).trim();
+			opts[option] = parseOption(match, DotenvOptionsType[option]);
 		}
-		return acc;
+		return opts;
 	}, {} as any) as DotenvConfig;
 	// Run command
 	runner({...options, ...cliOptions});
