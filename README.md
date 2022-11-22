@@ -269,7 +269,7 @@ dotenv.save({
 
 It will read your `.env` file following the criteria, parse the contents, assign it to `process.env`.
 
-> NOTE: This method differs from the previous `load` **function**.
+> Note: This method differs from the previous `load` **function**.
 > In that it requires the configuration to be loaded on the class instance via the constructor.
 
 ```
