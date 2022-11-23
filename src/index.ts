@@ -115,7 +115,6 @@ export class Dotenv {
 	#_expand: boolean = true;
 	#_override: boolean = false;
 	#_priorities: DotenvPriorities = {};
-	#_nodeEnv: string = "";
 
 	/**
 	 * Constructor.
@@ -265,7 +264,18 @@ export class Dotenv {
 	 * Get priorities.
 	 */
 	public get priorities(): DotenvPriorities {
-		return this.#_priorities;
+		const nodeEnv = process.env.NODE_ENV ?? "development";
+		const ext: string = this.extension ? `.${this.extension}` : "";
+		const priorities = Object.assign(
+			{
+				[`.env${ext}.${nodeEnv}.local`]: 75,
+				[`.env${ext}.local`]: 50,
+				[`.env${ext}.${nodeEnv}`]: 25,
+				[`.env${ext}`]: 1,
+			},
+			this.#_priorities ?? {},
+		);
+		return priorities;
 	}
 
 	/**
@@ -273,17 +283,7 @@ export class Dotenv {
 	 * @param value
 	 */
 	public set priorities(value: DotenvPriorities | undefined) {
-		this.#_nodeEnv = process.env.NODE_ENV ?? "development";
-		const ext: string = this.extension ? `.${this.extension}` : "";
-		this.#_priorities = Object.assign(
-			{
-				[`.env${ext}.${this.#_nodeEnv}.local`]: 75,
-				[`.env${ext}.local`]: 50,
-				[`.env${ext}.${this.#_nodeEnv}`]: 25,
-				[`.env${ext}`]: 1,
-			},
-			value ?? {},
-		);
+		if (value != null) this.#_priorities = value;
 	}
 
 	/**
