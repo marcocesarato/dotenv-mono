@@ -438,7 +438,8 @@ export class Dotenv {
 	 * @returns current instance
 	 */
 	public save(changes: DotenvData): this {
-		if (!this.plain || !this.path) return this;
+		const file = this.path ?? this.find();
+		if (!this.plain || !file || !fs.existsSync(file)) return this;
 
 		// https://github.com/stevenvachon/edit-dotenv
 		const EOL = "\r\n";
@@ -482,9 +483,10 @@ export class Dotenv {
 				return `${result}${variable}=${value}${EOL}`;
 			}
 		}, this.plain);
-		fs.writeFileSync(this.path, data, {
+		fs.writeFileSync(file, data, {
 			encoding: this.encoding,
 		});
+		this.plain = data;
 		return this;
 	}
 
