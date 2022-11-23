@@ -8,7 +8,7 @@ type GenericObject<T = any> = {[key: string]: T};
 /**
  * Configuration option types.
  */
-enum OptionType {
+export enum OptionType {
 	boolean,
 	number,
 	string,
@@ -19,7 +19,7 @@ enum OptionType {
 /**
  * List of all Dotenv configuration options type.
  */
-const DotenvOptionsType: GenericObject<OptionType> = {
+export const DotenvOptionsType: GenericObject<OptionType> = {
 	cwd: OptionType.string,
 	debug: OptionType.boolean,
 	defaults: OptionType.string,
@@ -38,13 +38,15 @@ const DotenvOptionsType: GenericObject<OptionType> = {
  * @param type - value type
  * @returns parsed option
  */
-function parseOption(option: string | undefined, type: OptionType): any {
+export function parseOption(option: string | undefined, type: OptionType): any {
 	if (option === undefined) return option;
 	if (type === OptionType.number) return Number(option);
 	if (type === OptionType.boolean) return option === "true";
-	if (type === OptionType.object) {
+	if (type === OptionType.object || type === OptionType.array) {
 		try {
-			return JSON.parse(option);
+			const result = JSON.parse(option);
+			if (type === OptionType.array) return Object.values(result);
+			return result;
 		} catch (e) {
 			console.error(e);
 		}
