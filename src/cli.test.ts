@@ -31,7 +31,7 @@ describe("runCli", () => {
 		expect(dotenv instanceof Dotenv).toBeTruthy();
 	});
 
-	it("runCli should return the expected output using environmental options", () => {
+	it("runCli should return the expected output using argv options", () => {
 		process.argv = ["dotenv_config_debug=true"];
 		const dotenv = runCli(load);
 		expect(dotenv instanceof Dotenv).toBeTruthy();
