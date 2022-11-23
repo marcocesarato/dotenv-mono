@@ -443,7 +443,7 @@ export class Dotenv {
 		if (!file || !fs.existsSync(file)) return this;
 
 		// https://github.com/stevenvachon/edit-dotenv
-		const EOL = os.EOL ?? "\r\n";
+		const EOL = os.EOL;
 		const breakPattern = /\n/g;
 		const breakReplacement = "\\n";
 		const flags = "gm";
