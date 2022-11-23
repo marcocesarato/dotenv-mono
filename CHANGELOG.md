@@ -4,7 +4,13 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [1.3.3](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.2...v1.3.3) (2022-11-23)
 
-### [1.3.2](https://github.com/marcocesarato/dotenv-mono/compare/v1.1.2...v1.3.2) (2022-11-22)
+### Bug Fixes
+
+-   save changes on dotenv file matching ([b07850fe](https://github.com/marcocesarato/dotenv-mono/commit/b07850fea6ede63b52b03ac59ccedf0855915548))
+-   add run cli return value ([d61cc1d0](https://github.com/marcocesarato/dotenv-mono/commit/d61cc1d0cba54bbdb83c5057fc2c306be61df8be))
+-   get priorities with environment on run ([32efc79d](https://github.com/marcocesarato/dotenv-mono/commit/32efc79d01ab27b693ee3f4b42ce585d37e42156))
+
+### [1.3.2](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.1...v1.3.2) (2022-11-22)
 
 ### Bug Fixes
 
