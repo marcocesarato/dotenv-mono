@@ -372,7 +372,7 @@ export class Dotenv {
 		const {root} = path.parse(directory);
 		let depth = 0;
 		let match = false;
-		while (this.depth ? depth < this.depth : true) {
+		while (depth < this.depth) {
 			depth++;
 			const {foundPath, foundDotenv} = matcher(dotenv, directory);
 			dotenv = foundDotenv;
