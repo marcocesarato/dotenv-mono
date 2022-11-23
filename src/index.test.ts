@@ -5,20 +5,20 @@ describe("Dotenv Mono", () => {
 	let instance: Dotenv;
 	const originalEnv = process.env;
 
-	const rootEnv = "TEST_ROOT_ENV: 1";
-	const defaultsEnv = "TEST_DEFAULT_ENV: 1";
-	const webTestEnv = "TEST_WEB_ENV: 1";
+	const rootEnvContent = "TEST_ROOT_ENV=1";
+	const defaultsEnvContent = "TEST_DEFAULT_ENV=1";
+	const webTestEnvContent = "TEST_WEB_ENV=1";
 
 	beforeEach(() => {
 		// Mocks
 		process.env = {...originalEnv, NODE_ENV: "test"};
 		mockFs({
 			"/root": {
-				".env": rootEnv,
-				".env.defaults": defaultsEnv,
+				".env": rootEnvContent,
+				".env.defaults": defaultsEnvContent,
 				"apps": {
 					"web": {
-						".env.test": webTestEnv,
+						".env.test": webTestEnvContent,
 					},
 				},
 			},
@@ -55,7 +55,7 @@ describe("Dotenv Mono", () => {
 			"TEST_WEB_ENV": "1",
 			"TEST_DEFAULT_ENV": "1",
 		};
-		expect(instance.plain).toEqual(webTestEnv);
+		expect(instance.plain).toEqual(webTestEnvContent);
 		expect(instance.env).toEqual(expected);
 		Object.keys(expected).forEach((key) => {
 			expect(process.env).toHaveProperty(key);
@@ -71,7 +71,7 @@ describe("Dotenv Mono", () => {
 			"TEST_ROOT_ENV": "1",
 			"TEST_DEFAULT_ENV": "1",
 		};
-		expect(instance.plain).toEqual(rootEnv);
+		expect(instance.plain).toEqual(rootEnvContent);
 		expect(instance.env).toEqual(expected);
 		Object.keys(expected).forEach((key) => {
 			expect(process.env).toHaveProperty(key);
@@ -85,7 +85,7 @@ describe("Dotenv Mono", () => {
 			"TEST_ROOT_ENV": "1",
 			"TEST_DEFAULT_ENV": "1",
 		};
-		expect(instance.plain).toEqual(rootEnv);
+		expect(instance.plain).toEqual(rootEnvContent);
 		expect(instance.env).not.toEqual(expected);
 		Object.keys(expected).forEach((key) => {
 			expect(process.env).not.toHaveProperty(key);
@@ -93,13 +93,17 @@ describe("Dotenv Mono", () => {
 	});
 
 	it("should have a method save() and save changes without throw errors", () => {
-		instance.loadFile();
+		expect(instance.loadFile).toBeDefined();
+		expect(instance.save).toBeDefined();
+		expect(() => instance.loadFile()).not.toThrow();
 		expect(() =>
 			instance.save({
+				"TEST_ROOT_ENV": "2",
 				"TEST_CHANGES_ENV": "1",
 			}),
 		).not.toThrow();
-		expect(instance.save).toBeDefined();
+		expect(instance.plain).toContain("TEST_ROOT_ENV=2");
+		expect(instance.plain).toContain("TEST_CHANGES_ENV=1");
 	});
 
 	it("should expose a function", () => {
