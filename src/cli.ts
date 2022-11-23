@@ -70,8 +70,8 @@ export function runCli(runner: Function): any {
 	});
 	// CLI Parameter configuration parser
 	const args: string[] = process.argv;
-	const keys: string = Object.keys(options).join("|");
-	const re = new RegExp(`^dotenv_config_(${keys})=(.+)$`, "g");
+	const keys: string = Object.keys(DotenvOptionsType).join("|");
+	const re = new RegExp(`^dotenv_config_(${keys})=(.*?)$`, "g");
 	const cliOptions = args.reduce(function (opts, cur) {
 		const matches = cur.match(re);
 		if (matches) {
