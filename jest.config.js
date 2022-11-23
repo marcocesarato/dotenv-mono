@@ -6,4 +6,5 @@ module.exports = {
 	collectCoverage: true,
 	coverageReporters: ["json", "html"],
 	testPathIgnorePatterns: ["dist"],
+	setupFilesAfterEnv: ["jest-extended/all"],
 };

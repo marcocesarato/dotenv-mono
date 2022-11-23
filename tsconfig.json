@@ -17,7 +17,7 @@
 		"strict": true,
 		"sourceMap": true,
 		"target": "es6",
-		"types": ["@types/node", "@types/jest"],
+		"types": ["node", "jest", "jest-extended"],
 		"module": "commonjs",
 		"outDir": "./dist",
 		"baseUrl": "./src"

@@ -2,7 +2,7 @@ module.exports = {
 	root: true,
 	parser: "@typescript-eslint/parser",
 	extends: ["prettier", "plugin:prettier/recommended"],
-	plugins: ["@typescript-eslint", "simple-import-sort", "prettier"],
+	plugins: ["@typescript-eslint", "jest", "jest-extended", "simple-import-sort", "prettier"],
 	env: {
 		node: true,
 		browser: true,
@@ -17,5 +17,5 @@ module.exports = {
 		"no-var": "warn",
 		"prefer-const": "warn",
 	},
-	ignorePatterns: ["**/build/**/*"],
+	ignorePatterns: ["**/dist/**/*", "**/coverage/**/*"],
 };
