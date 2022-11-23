@@ -6,6 +6,7 @@ describe("Dotenv Mono", () => {
 	const originalEnv = process.env;
 
 	const rootEnvContent = "TEST_ROOT_ENV=1";
+	const rootOverwriteEnvContent = "TEST_OVERWRITE_ENV=1";
 	const defaultsEnvContent = "TEST_DEFAULT_ENV=1";
 	const webTestEnvContent = "TEST_WEB_ENV=1";
 
@@ -15,6 +16,7 @@ describe("Dotenv Mono", () => {
 		mockFs({
 			"/root": {
 				".env": rootEnvContent,
+				".env.overwrite": rootOverwriteEnvContent,
 				".env.defaults": defaultsEnvContent,
 				"apps": {
 					"web": {
@@ -57,14 +59,12 @@ describe("Dotenv Mono", () => {
 		};
 		expect(instance.plain).toEqual(webTestEnvContent);
 		expect(instance.env).toEqual(expected);
-		Object.keys(expected).forEach((key) => {
-			expect(process.env).toHaveProperty(key);
-		});
+		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
 
 	it("should load the expected environment variables from web directory on production", () => {
 		expect(instance.load).toBeDefined();
-		process.env = {...process.env, NODE_ENV: "production"};
+		process.env.NODE_ENV = "production";
 		jest.spyOn(process, "cwd").mockReturnValue("/root/apps/web");
 		expect(() => instance.load()).not.toThrow();
 		const expected = {
@@ -73,9 +73,33 @@ describe("Dotenv Mono", () => {
 		};
 		expect(instance.plain).toEqual(rootEnvContent);
 		expect(instance.env).toEqual(expected);
-		Object.keys(expected).forEach((key) => {
-			expect(process.env).toHaveProperty(key);
-		});
+		expect(process.env).toEqual(expect.objectContaining(expected));
+	});
+
+	it("should load the expected environment variables from specified path", () => {
+		instance.path = "/root/.env.overwrite";
+		expect(() => instance.load()).not.toThrow();
+		const expected = {
+			"TEST_OVERWRITE_ENV": "1",
+			"TEST_DEFAULT_ENV": "1",
+		};
+		expect(instance.plain).toEqual(rootOverwriteEnvContent);
+		expect(instance.env).toEqual(expected);
+		expect(process.env).toEqual(expect.objectContaining(expected));
+	});
+
+	it("should load the expected environment variables specifying priorities", () => {
+		instance.priorities = {
+			".env.overwrite": 100,
+		};
+		expect(() => instance.load()).not.toThrow();
+		const expected = {
+			"TEST_OVERWRITE_ENV": "1",
+			"TEST_DEFAULT_ENV": "1",
+		};
+		expect(instance.plain).toEqual(rootOverwriteEnvContent);
+		expect(instance.env).toEqual(expected);
+		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
 
 	it("should have a method loadFile() and load file without change the process env", () => {
@@ -87,13 +111,10 @@ describe("Dotenv Mono", () => {
 		};
 		expect(instance.plain).toEqual(rootEnvContent);
 		expect(instance.env).not.toEqual(expected);
-		Object.keys(expected).forEach((key) => {
-			expect(process.env).not.toHaveProperty(key);
-		});
+		expect(process.env).not.toEqual(expect.objectContaining(expected));
 	});
 
 	it("should have a method save() and save changes without throw errors", () => {
-		expect(instance.loadFile).toBeDefined();
 		expect(instance.save).toBeDefined();
 		expect(() => instance.loadFile()).not.toThrow();
 		expect(() =>
