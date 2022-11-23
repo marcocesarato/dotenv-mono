@@ -132,8 +132,8 @@ describe("Dotenv Mono", () => {
 	});
 
 	it("dotenvLoad should return expected output", () => {
-		const retValue = dotenvLoad();
-		expect(retValue).toBeDefined();
+		const dotenv = dotenvLoad();
+		expect(dotenv.env).toBeDefined();
 	});
 
 	it("should expose a function", () => {
@@ -141,7 +141,7 @@ describe("Dotenv Mono", () => {
 	});
 
 	it("dotenvConfig should return expected output", () => {
-		const retValue = dotenvConfig();
-		expect(retValue).toBeDefined();
+		const output = dotenvConfig();
+		expect(output).toHaveProperty("parsed");
 	});
 });
