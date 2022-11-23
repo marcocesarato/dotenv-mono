@@ -56,7 +56,7 @@ function parseOption(option: string | undefined, type: OptionType): any {
  * Run CLI Dotenv runners.
  * @param runner
  */
-export function runCli(runner: Function) {
+export function runCli(runner: Function): any {
 	// Empty options
 	const options: GenericObject = {};
 	// Environment configuration
@@ -80,5 +80,5 @@ export function runCli(runner: Function) {
 		return opts;
 	}, {} as any) as DotenvConfig;
 	// Run command
-	runner({...options, ...cliOptions});
+	return runner({...options, ...cliOptions});
 }
