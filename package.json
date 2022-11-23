@@ -32,7 +32,7 @@
 		"tsc": "tsc",
 		"prepare": "tsc",
 		"test": "jest",
-		"coverage": "jest --coverage"
+		"coverage": "jest --coverage && start coverage/index.html"
 	},
 	"dependencies": {
 		"dotenv": "^16.0.3",
