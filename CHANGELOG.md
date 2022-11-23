@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.4](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.3...v1.3.4) (2022-11-23)
+
+### Bug Fixes
+
+-   cli argv parameters parsing ([037d338](https://github.com/marcocesarato/dotenv-mono/commit/037d33875b0466b039cf67744eb660ad7b3b9448))
+-   save changes on empty dotenv ([b76948d](https://github.com/marcocesarato/dotenv-mono/commit/b76948d375d537b7865263529e67bf80a68af3b3))
+
 ### [1.3.3](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.2...v1.3.3) (2022-11-23)
 
 ### Bug Fixes
