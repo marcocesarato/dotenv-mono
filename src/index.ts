@@ -273,7 +273,7 @@ export class Dotenv {
 				[`.env${ext}.${nodeEnv}`]: 25,
 				[`.env${ext}`]: 1,
 			},
-			this.#_priorities ?? {},
+			this.#_priorities,
 		);
 		return priorities;
 	}
@@ -439,7 +439,7 @@ export class Dotenv {
 	 */
 	public save(changes: DotenvData): this {
 		const file = this.path ?? this.find();
-		if (!this.plain || !file || !fs.existsSync(file)) return this;
+		if (!file || !fs.existsSync(file)) return this;
 
 		// https://github.com/stevenvachon/edit-dotenv
 		const EOL = "\r\n";
