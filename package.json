@@ -115,6 +115,9 @@
 		"shared",
 		"share",
 		"default",
-		"defaults"
+		"defaults",
+		"cli",
+		"console",
+		"preload"
 	]
 }
