@@ -4,5 +4,6 @@ module.exports = {
 	testEnvironment: "node",
 	coverageDirectory: "./coverage/",
 	collectCoverage: true,
+	coverageReporters: ["json", "html"],
 	testPathIgnorePatterns: ["dist"],
 };
