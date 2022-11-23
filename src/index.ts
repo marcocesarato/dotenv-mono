@@ -1,4 +1,5 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
 import dotenv, {DotenvConfigOutput, DotenvParseOutput} from "dotenv";
 import dotenvExpand from "dotenv-expand";
@@ -442,7 +443,7 @@ export class Dotenv {
 		if (!file || !fs.existsSync(file)) return this;
 
 		// https://github.com/stevenvachon/edit-dotenv
-		const EOL = "\r\n";
+		const EOL = os.EOL ?? "\r\n";
 		const breakPattern = /\n/g;
 		const breakReplacement = "\\n";
 		const flags = "gm";
@@ -451,6 +452,7 @@ export class Dotenv {
 		const h = "[^\\S\\r\\n]";
 		const returnPattern = /\r/g;
 		const returnReplacement = "\\r";
+		const endsWithEOL = (string: string) => string.endsWith("\n") || string.endsWith("\r\n");
 
 		let hasAppended = false;
 		const data = Object.keys(changes).reduce((result: string, variable: string) => {
@@ -467,14 +469,14 @@ export class Dotenv {
 			} else if (result === "") {
 				hasAppended = true;
 				return `${variable}=${value}${EOL}`;
-			} else if (!result.endsWith(EOL) && !hasAppended) {
+			} else if (!endsWithEOL(result) && !hasAppended) {
 				hasAppended = true;
 				// Add an extra break between previously defined and newly appended variable
 				return `${result}${EOL}${EOL}${variable}=${value}`;
-			} else if (!result.endsWith(EOL)) {
+			} else if (!endsWithEOL(result)) {
 				// Add break for appended variable
 				return `${result}${EOL}${variable}=${value}`;
-			} else if (result.endsWith(EOL) && !hasAppended) {
+			} else if (endsWithEOL(result) && !hasAppended) {
 				hasAppended = true;
 				// Add an extra break between previously defined and newly appended variable
 				return `${result}${EOL}${variable}=${value}${EOL}`;
