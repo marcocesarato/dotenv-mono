@@ -312,6 +312,8 @@ public loadFile(): Dotenv;
 
 Merge the data on input with the loaded data from `load` or `loadFile`, and save the changes on the original dotenv file.
 
+> Note: If `.env.defaults` is present, it won't be overwritten, you can just save the changes on the main dotenv file (`.env`, `.env.local`, etc...)
+
 ```
 public save(changes: Record<string, any>): Dotenv;
 ```
