@@ -31,7 +31,8 @@
 		"build": "tsc",
 		"tsc": "tsc",
 		"prepare": "tsc",
-		"test": "jest"
+		"test": "jest",
+		"coverage": "jest --coverage"
 	},
 	"dependencies": {
 		"dotenv": "^16.0.3",
