@@ -16,6 +16,7 @@ describe("Dotenv Mono", () => {
 		mockFs({
 			"/root": {
 				".env": rootEnvContent,
+				".env.empty": "",
 				".env.overwrite": rootOverwriteEnvContent,
 				".env.defaults": defaultsEnvContent,
 				"apps": {
@@ -27,7 +28,13 @@ describe("Dotenv Mono", () => {
 		});
 		jest.spyOn(process, "cwd").mockReturnValue("/root/apps");
 		// Setup
-		instance = new Dotenv();
+		instance = new Dotenv({
+			defaults: ".env.defaults",
+			encoding: "utf8",
+			expand: true,
+			depth: 3,
+			override: false,
+		});
 	});
 
 	afterEach(() => {
@@ -64,7 +71,7 @@ describe("Dotenv Mono", () => {
 
 	it("should load the expected environment variables from web directory on production", () => {
 		expect(instance.load).toBeDefined();
-		process.env.NODE_ENV = "production";
+		process.env.NODE_ENV = undefined;
 		jest.spyOn(process, "cwd").mockReturnValue("/root/apps/web");
 		expect(() => instance.load()).not.toThrow();
 		const expected = {
@@ -102,6 +109,34 @@ describe("Dotenv Mono", () => {
 		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
 
+	it("should load the expected environment variables specifying an extension", () => {
+		instance.extension = "overwrite";
+		expect(() => instance.load()).not.toThrow();
+		const expected = {
+			"TEST_OVERWRITE_ENV": "1",
+			"TEST_DEFAULT_ENV": "1",
+		};
+		expect(instance.plain).toEqual(rootOverwriteEnvContent);
+		expect(instance.env).toEqual(expected);
+		expect(process.env).toEqual(expect.objectContaining(expected));
+	});
+
+	it("should load returns an empty output when none dotenv been found", () => {
+		jest.spyOn(process, "cwd").mockReturnValue("/empty");
+		instance.cwd = process.cwd();
+		expect(() => instance.load()).not.toThrow();
+		expect(instance.plain).toEqual("");
+		expect(instance.env).toEqual({});
+	});
+
+	it("should load returns an empty output when the specified file dotenv not been found", () => {
+		instance.path = "/wrong/.env";
+		jest.spyOn(process, "cwd").mockReturnValue("/wrong");
+		expect(() => instance.load()).not.toThrow();
+		expect(instance.plain).toEqual("");
+		expect(instance.env).toEqual({});
+	});
+
 	it("should have a method loadFile() and load file without change the process env", () => {
 		expect(instance.loadFile).toBeDefined();
 		expect(() => instance.loadFile()).not.toThrow();
@@ -119,8 +154,22 @@ describe("Dotenv Mono", () => {
 		expect(() => instance.loadFile()).not.toThrow();
 		expect(() =>
 			instance.save({
-				"TEST_ROOT_ENV": "2",
 				"TEST_CHANGES_ENV": "1",
+				"TEST_ROOT_ENV": "2",
+			}),
+		).not.toThrow();
+		expect(instance.plain).toContain("TEST_ROOT_ENV=2");
+		expect(instance.plain).toContain("TEST_CHANGES_ENV=1");
+	});
+
+	it("should have a method save() and save changes without throw errors on empty dotenv", () => {
+		expect(instance.save).toBeDefined();
+		instance.path = "/root/.env.empty";
+		expect(() => instance.loadFile()).not.toThrow();
+		expect(() =>
+			instance.save({
+				"TEST_CHANGES_ENV": "1",
+				"TEST_ROOT_ENV": "2",
 			}),
 		).not.toThrow();
 		expect(instance.plain).toContain("TEST_ROOT_ENV=2");
