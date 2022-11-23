@@ -2,6 +2,12 @@ import {OptionType, parseOption, runCli} from "./cli";
 import {config, Dotenv, load} from "./index";
 
 describe("runCli", () => {
+	const originalEnv = process.env;
+
+	beforeEach(() => {
+		process.env = {...originalEnv, NODE_ENV: "test"};
+	});
+
 	it("should expose a function", () => {
 		expect(runCli).toBeDefined();
 	});
@@ -18,6 +24,18 @@ describe("runCli", () => {
 		const output = runCli(config);
 		expect(output).toHaveProperty("parsed");
 	});
+
+	it("runCli should return the expected output using environmental options", () => {
+		process.env.DOTENV_CONFIG_DEBUG = "true";
+		const dotenv = runCli(load);
+		expect(dotenv instanceof Dotenv).toBeTruthy();
+	});
+
+	it("runCli should return the expected output using environmental options", () => {
+		process.argv = ["dotenv_config_debug=true"];
+		const dotenv = runCli(load);
+		expect(dotenv instanceof Dotenv).toBeTruthy();
+	});
 });
 
 describe("parseOption", () => {
@@ -26,11 +44,15 @@ describe("parseOption", () => {
 	});
 
 	it("parseOption should return expected output", () => {
+		expect(parseOption(undefined, OptionType.number) === undefined).toBeTruthy();
 		expect(parseOption("1", OptionType.number) === 1).toBeTruthy();
 		expect(parseOption("true", OptionType.boolean) === true).toBeTruthy();
 		expect(parseOption("false", OptionType.boolean) === false).toBeTruthy();
 		expect(parseOption("message", OptionType.string) === "message").toBeTruthy();
 		expect(typeof parseOption('{"value": 1}', OptionType.object) === "object").toBeTruthy();
 		expect(Array.isArray(parseOption("[1, 2]", OptionType.array))).toBeTruthy();
+		// Malformed JSON parsing
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(typeof parseOption('{"malformed": 1]', OptionType.object) === "string").toBeTruthy();
 	});
 });
