@@ -23,6 +23,7 @@ describe("Dotenv Mono", () => {
 				},
 			},
 		});
+		jest.spyOn(process, "cwd").mockReturnValue("/root/apps");
 		// Setup
 		instance = new Dotenv();
 	});
@@ -46,21 +47,6 @@ describe("Dotenv Mono", () => {
 		expect(instance.load).toBeDefined();
 	});
 
-	it("should load the expected environment variables from apps directory", () => {
-		expect(instance.load).toBeDefined();
-		jest.spyOn(process, "cwd").mockReturnValue("/root/apps");
-		expect(() => instance.load()).not.toThrow();
-		const expected = {
-			"TEST_ROOT_ENV": "1",
-			"TEST_DEFAULT_ENV": "1",
-		};
-		expect(instance.plain).toEqual(rootEnv);
-		expect(instance.env).toEqual(expected);
-		Object.keys(expected).forEach((key) => {
-			expect(process.env).toHaveProperty(key);
-		});
-	});
-
 	it("should load the expected environment variables from web directory", () => {
 		expect(instance.load).toBeDefined();
 		jest.spyOn(process, "cwd").mockReturnValue("/root/apps/web");
@@ -76,9 +62,24 @@ describe("Dotenv Mono", () => {
 		});
 	});
 
+	it("should load the expected environment variables from web directory on production", () => {
+		expect(instance.load).toBeDefined();
+		process.env = {...process.env, NODE_ENV: "production"};
+		jest.spyOn(process, "cwd").mockReturnValue("/root/apps/web");
+		expect(() => instance.load()).not.toThrow();
+		const expected = {
+			"TEST_ROOT_ENV": "1",
+			"TEST_DEFAULT_ENV": "1",
+		};
+		expect(instance.plain).toEqual(rootEnv);
+		expect(instance.env).toEqual(expected);
+		Object.keys(expected).forEach((key) => {
+			expect(process.env).toHaveProperty(key);
+		});
+	});
+
 	it("should have a method loadFile() and load file without change the process env", () => {
 		expect(instance.loadFile).toBeDefined();
-		jest.spyOn(process, "cwd").mockReturnValue("/root/apps");
 		expect(() => instance.loadFile()).not.toThrow();
 		const expected = {
 			"TEST_ROOT_ENV": "1",
