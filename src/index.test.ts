@@ -7,6 +7,8 @@ describe("Dotenv Mono", () => {
 
 	const rootEnvContent = "TEST_ROOT_ENV=1";
 	const rootOverwriteEnvContent = "TEST_OVERWRITE_ENV=1";
+	const rootMalformedEnvContent = "TEST_MALFORMED_ENV";
+	const rootMalformedEolEnvContent = "TEST_MALFORMED_ENV\r\n";
 	const defaultsEnvContent = "TEST_DEFAULT_ENV=1";
 	const webTestEnvContent = "TEST_WEB_ENV=1";
 
@@ -19,6 +21,8 @@ describe("Dotenv Mono", () => {
 				".env.empty": "",
 				".env.overwrite": rootOverwriteEnvContent,
 				".env.defaults": defaultsEnvContent,
+				".env.malformed": rootMalformedEnvContent,
+				".env.malformed.eol": rootMalformedEolEnvContent,
 				"apps": {
 					"web": {
 						".env.test": webTestEnvContent,
@@ -32,7 +36,6 @@ describe("Dotenv Mono", () => {
 			defaults: ".env.defaults",
 			encoding: "utf8",
 			expand: true,
-			depth: 3,
 			override: false,
 		});
 	});
@@ -129,6 +132,15 @@ describe("Dotenv Mono", () => {
 		expect(instance.env).toEqual({});
 	});
 
+	it("should load returns an empty output when the current working directory is too deep to reach dotenv", () => {
+		jest.spyOn(process, "cwd").mockReturnValue("/root/path/too/deep/");
+		instance.depth = 2;
+		instance.cwd = process.cwd();
+		expect(() => instance.load()).not.toThrow();
+		expect(instance.plain).toEqual("");
+		expect(instance.env).toEqual({});
+	});
+
 	it("should load returns an empty output when the specified file dotenv not been found", () => {
 		instance.path = "/wrong/.env";
 		jest.spyOn(process, "cwd").mockReturnValue("/wrong");
@@ -174,6 +186,43 @@ describe("Dotenv Mono", () => {
 		).not.toThrow();
 		expect(instance.plain).toContain("TEST_ROOT_ENV=2");
 		expect(instance.plain).toContain("TEST_CHANGES_ENV=1");
+	});
+
+	it("should have a method save() and save changes without throw errors on malformed dotenv", () => {
+		expect(instance.save).toBeDefined();
+		instance.path = "/root/.env.malformed";
+		expect(() => instance.loadFile()).not.toThrow();
+		expect(() =>
+			instance.save({
+				"TEST_CHANGES_ENV": "1",
+				"TEST_ROOT_ENV": "2",
+			}),
+		).not.toThrow();
+		expect(instance.plain).toContain("TEST_ROOT_ENV=2");
+		expect(instance.plain).toContain("TEST_CHANGES_ENV=1");
+	});
+
+	it("should have a method save() and save changes without throw errors on malformed with ends eol dotenv", () => {
+		expect(instance.save).toBeDefined();
+		instance.path = "/root/.env.malformed.eol";
+		expect(() => instance.loadFile()).not.toThrow();
+		expect(() =>
+			instance.save({
+				"TEST_CHANGES_ENV": "1",
+				"TEST_ROOT_ENV": "2",
+			}),
+		).not.toThrow();
+		expect(instance.plain).toContain("TEST_ROOT_ENV=2");
+		expect(instance.plain).toContain("TEST_CHANGES_ENV=1");
+	});
+
+	it("should have a method save() and save changes without throw errors on not existing file", () => {
+		expect(instance.save).toBeDefined();
+		jest.spyOn(process, "cwd").mockReturnValue("/not/");
+		instance.path = "/not/.exists";
+		expect(() => instance.loadFile()).not.toThrow();
+		expect(() => instance.save({"TEST_CHANGES_ENV": "1"})).not.toThrow();
+		expect(instance.plain).toEqual("");
 	});
 
 	it("should expose a function", () => {
