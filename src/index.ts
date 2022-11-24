@@ -103,8 +103,6 @@ export class Dotenv {
 	// Public config properties
 	public config: DotenvConfigOutput = {};
 	public env: DotenvData = {};
-	public extension: string | undefined;
-	public path: string | undefined;
 	public plain: string = "";
 
 	// Accessor properties
@@ -114,7 +112,9 @@ export class Dotenv {
 	#_depth: number = 4;
 	#_encoding: BufferEncoding = "utf8";
 	#_expand: boolean = true;
+	#_extension: string = "";
 	#_override: boolean = false;
+	#_path: string = "";
 	#_priorities: DotenvPriorities = {};
 
 	/**
@@ -216,6 +216,20 @@ export class Dotenv {
 	}
 
 	/**
+	 * Get extension.
+	 */
+	public get extension(): string {
+		return this.#_extension;
+	}
+
+	/**
+	 * Set extension.
+	 */
+	public set extension(value: string | undefined) {
+		if (value != null) this.#_extension = value;
+	}
+
+	/**
 	 * Get current working directory.
 	 */
 	public get cwd(): string {
@@ -259,6 +273,20 @@ export class Dotenv {
 	 */
 	public set override(value: boolean | undefined) {
 		if (value != null) this.#_override = value;
+	}
+
+	/**
+	 * Get path.
+	 */
+	public get path(): string {
+		return this.#_path;
+	}
+
+	/**
+	 * Set path.
+	 */
+	public set path(value: string | undefined) {
+		if (value != null) this.#_path = value;
 	}
 
 	/**
@@ -306,7 +334,7 @@ export class Dotenv {
 		this.env = {};
 		this.config = {};
 		// Load dotenv source file
-		const file = this.path ?? this.find();
+		const file = this.path || this.find();
 		this.loadDotenv(file, loadOnProcess);
 		// Load default without override the source file
 		const defaultFile = this.find(this.dotenvDefaultsMatcher);
@@ -439,7 +467,7 @@ export class Dotenv {
 	 * @returns current instance
 	 */
 	public save(changes: DotenvData): this {
-		const file = this.path ?? this.find();
+		const file = this.path || this.find();
 		if (!file || !fs.existsSync(file)) return this;
 
 		// https://github.com/stevenvachon/edit-dotenv
