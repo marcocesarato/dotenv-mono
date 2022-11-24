@@ -2,7 +2,7 @@ import {OptionType, parseOption, runCli} from "./cli";
 import {config, Dotenv, load} from "./index";
 import mockFs from "mock-fs";
 
-describe("runCli", () => {
+describe("Run CLI", () => {
 	const originalEnv = process.env;
 
 	beforeEach(() => {
@@ -20,12 +20,12 @@ describe("runCli", () => {
 		expect(runCli).toBeDefined();
 	});
 
-	it("runCli should not throw errors", () => {
+	it("should not throw errors", () => {
 		expect(() => runCli(load)).not.toThrow();
 		expect(() => runCli(config)).not.toThrow();
 	});
 
-	it("runCli should return the expected output", () => {
+	it("should return the expected output", () => {
 		const dotenv = runCli(load);
 		expect(dotenv instanceof Dotenv).toBeTruthy();
 		expect(dotenv.env).not.toBeEmptyObject();
@@ -35,14 +35,14 @@ describe("runCli", () => {
 		expect(output.parsed).not.toBeEmptyObject();
 	});
 
-	it("runCli should return the expected output using environmental options", () => {
+	it("should return the expected output using environmental options", () => {
 		process.env.DOTENV_CONFIG_DEBUG = "true";
 		const dotenv = runCli(load);
 		expect(dotenv instanceof Dotenv).toBeTruthy();
 		expect(dotenv.env).not.toBeEmptyObject();
 	});
 
-	it("runCli should return the expected output using argv options", () => {
+	it("should return the expected output using argv options", () => {
 		process.argv = ["dotenv_config_debug=true"];
 		const dotenv = runCli(load);
 		expect(dotenv instanceof Dotenv).toBeTruthy();
@@ -50,12 +50,12 @@ describe("runCli", () => {
 	});
 });
 
-describe("parseOption", () => {
+describe("Parse Option", () => {
 	it("should expose a function", () => {
 		expect(parseOption).toBeDefined();
 	});
 
-	it("parseOption should return expected output", () => {
+	it("should return expected output", () => {
 		expect(parseOption).toBeDefined();
 		expect(parseOption(undefined, OptionType.number)).toBeUndefined();
 		expect(parseOption("1", OptionType.number)).toEqual(1);

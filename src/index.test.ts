@@ -1,4 +1,4 @@
-import Dotenv, {dotenvLoad, dotenvConfig} from "./index";
+import Dotenv, {dotenvLoad, dotenvConfig, load, config} from "./index";
 import mockFs from "mock-fs";
 
 describe("Dotenv Mono", () => {
@@ -43,8 +43,24 @@ describe("Dotenv Mono", () => {
 		mockFs.restore();
 	});
 
-	it("should have a method parse() and parse a dotenv string", () => {
+	it("should have config options", () => {
+		expect(instance.cwd).toBeDefined();
+		expect(instance.debug).toBeDefined();
+		expect(instance.defaults).toBeDefined();
+		expect(instance.depth).toBeDefined();
+		expect(instance.encoding).toBeDefined();
+		expect(instance.expand).toBeDefined();
+		expect(instance.extension).toBeDefined();
+		expect(instance.override).toBeDefined();
+		expect(instance.path).toBeDefined();
+		expect(instance.priorities).toBeDefined();
+	});
+
+	it("should have a method parse()", () => {
 		expect(instance.parse).toBeDefined();
+	});
+
+	it("should parse a dotenv string", () => {
 		const output = instance.parse("TEST_PARSE_1: 1\nTEST_PARSE_2: 2");
 		expect(output).toEqual({"TEST_PARSE_1": "1", "TEST_PARSE_2": "2"});
 	});
@@ -54,7 +70,6 @@ describe("Dotenv Mono", () => {
 	});
 
 	it("should load the expected environment variables from web directory", () => {
-		expect(instance.load).toBeDefined();
 		jest.spyOn(process, "cwd").mockReturnValue("/root/apps/web");
 		expect(() => instance.load()).not.toThrow();
 		const expected = {"TEST_WEB_ENV": "1", "TEST_DEFAULT_ENV": "1"};
@@ -64,7 +79,6 @@ describe("Dotenv Mono", () => {
 	});
 
 	it("should load the expected environment variables from web directory on production", () => {
-		expect(instance.load).toBeDefined();
 		process.env.NODE_ENV = undefined;
 		jest.spyOn(process, "cwd").mockReturnValue("/root/apps/web");
 		expect(() => instance.load()).not.toThrow();
@@ -137,39 +151,38 @@ describe("Dotenv Mono", () => {
 		expect(process.env).not.toEqual(expect.objectContaining(expected));
 	});
 
-	it("should have a method save() and save changes without throw errors", () => {
+	it("should have a method save()", () => {
 		expect(instance.save).toBeDefined();
+	});
+
+	it("should save changes", () => {
 		expect(() => instance.loadFile()).not.toThrow();
 		expect(() => instance.save({"TEST_CHANGES_ENV": "1", "TEST_ROOT_ENV": "2"})).not.toThrow();
 		expect(instance.plain).toIncludeMultiple(["TEST_CHANGES_ENV=1", "TEST_ROOT_ENV=2"]);
 	});
 
-	it("should have a method save() and save changes without throw errors on empty dotenv", () => {
-		expect(instance.save).toBeDefined();
+	it("should save changes on empty dotenv", () => {
 		instance.path = "/root/.env.empty";
 		expect(() => instance.loadFile()).not.toThrow();
 		expect(() => instance.save({"TEST_CHANGES_ENV": "1", "TEST_ROOT_ENV": "2"})).not.toThrow();
 		expect(instance.plain).toIncludeMultiple(["TEST_CHANGES_ENV=1", "TEST_ROOT_ENV=2"]);
 	});
 
-	it("should have a method save() and save changes without throw errors on malformed dotenv", () => {
-		expect(instance.save).toBeDefined();
+	it("should save changes on malformed dotenv", () => {
 		instance.path = "/root/.env.malformed";
 		expect(() => instance.loadFile()).not.toThrow();
 		expect(() => instance.save({"TEST_CHANGES_ENV": "1", "TEST_ROOT_ENV": "2"})).not.toThrow();
 		expect(instance.plain).toIncludeMultiple(["TEST_CHANGES_ENV=1", "TEST_ROOT_ENV=2"]);
 	});
 
-	it("should have a method save() and save changes without throw errors on malformed with ends eol dotenv", () => {
-		expect(instance.save).toBeDefined();
+	it("should save changes on malformed with ends eol dotenv", () => {
 		instance.path = "/root/.env.malformed.eol";
 		expect(() => instance.loadFile()).not.toThrow();
 		expect(() => instance.save({"TEST_CHANGES_ENV": "1"})).not.toThrow();
 		expect(instance.plain).toInclude("TEST_CHANGES_ENV=1");
 	});
 
-	it("should have a method save() and save changes without throw errors on not existing file", () => {
-		expect(instance.save).toBeDefined();
+	it("should not save changes on not existing file", () => {
 		jest.spyOn(process, "cwd").mockReturnValue("/not/");
 		instance.path = "/not/.exists";
 		expect(() => instance.loadFile()).not.toThrow();
@@ -177,15 +190,30 @@ describe("Dotenv Mono", () => {
 		expect(instance.plain).toBeEmpty();
 	});
 
-	it("should expose dotenvLoad function and return expected output", () => {
+	it("should expose dotenvLoad() function", () => {
 		expect(dotenvLoad).toBeDefined();
+	});
+
+	it("should expose load() function", () => {
+		expect(load).toBeDefined();
+	});
+
+	it("should dotenvLoad() return expected output", () => {
 		const dotenv = dotenvLoad();
 		expect(dotenv.env).not.toBeEmptyObject();
 	});
 
-	it("should expose dotenvConfig function and return expected output", () => {
+	it("should expose dotenvConfig() function", () => {
 		expect(dotenvConfig).toBeDefined();
+	});
+
+	it("should expose config() function", () => {
+		expect(config).toBeDefined();
+	});
+
+	it("should dotenvConfig() return expected output", () => {
 		const output = dotenvConfig();
 		expect(output).toHaveProperty("parsed");
+		expect(output.parsed).not.toBeEmptyObject();
 	});
 });
