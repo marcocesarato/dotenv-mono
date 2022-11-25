@@ -45,10 +45,12 @@ export function parseOption(option: string | undefined, type: OptionType): any {
 	if (type === OptionType.object || type === OptionType.array) {
 		try {
 			const result = JSON.parse(option);
+			if (typeof result !== "object") throw new Error("The parsed value is not an object!");
 			if (type === OptionType.array) return Object.values(result);
 			return result;
 		} catch (e) {
-			console.error(e);
+			console.error(`Invalid value for "${option}" option`, e);
+			return undefined;
 		}
 	}
 	return option;
