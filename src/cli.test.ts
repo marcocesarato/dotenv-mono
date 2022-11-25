@@ -66,6 +66,6 @@ describe("Parse Option", () => {
 		expect(parseOption("[1, 2]", OptionType.array)).toEqual([1, 2]);
 		// Malformed JSON parsing
 		jest.spyOn(console, "error").mockImplementationOnce(() => {});
-		expect(parseOption('{"malformed": 1]]', OptionType.object)).toEqual('{"malformed": 1]]');
+		expect(parseOption('{"malformed": 1]]', OptionType.object)).toBeUndefined();
 	});
 });
