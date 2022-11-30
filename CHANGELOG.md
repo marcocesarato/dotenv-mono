@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.6](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.5...v1.3.6) (2022-11-30)
+
+### Bug Fixes
+
+-   check json value parsed on run cli ([015e454](https://github.com/marcocesarato/dotenv-mono/commit/015e454965e9c32a14971a7a708828981557949e))
+-   prevent path empty string ([7bd3f59](https://github.com/marcocesarato/dotenv-mono/commit/7bd3f599b13821a4539fd56de852096d26b2ff46))
+
 ### [1.3.5](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.4...v1.3.5) (2022-11-23)
 
 ### Bug Fixes
