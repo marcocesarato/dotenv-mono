@@ -4,7 +4,7 @@
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"description": "This is a package that permit to load a dotenv even from a children applications or packages of a monorepo. It contains also some additionals features like manipulations and save of the changes on the dotenv file.",
+	"description": "This package permit to have a centralized dotenv on a monorepo. It also includes some extra features such as manipulation and saving of changes to the dotenv file, a default centralized file, and a file loader with ordering and priorities.",
 	"author": "Marco Cesarato <cesarato.developer@gmail.com>",
 	"exports": {
 		".": {
@@ -91,6 +91,9 @@
 		"load",
 		"loader",
 		"mono",
+		"one",
+		"single",
+		"centralized",
 		"repo",
 		"changes",
 		"edit",
