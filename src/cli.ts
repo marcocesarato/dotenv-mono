@@ -50,9 +50,13 @@ class ParseError extends Error {
  * @returns parsed option
  */
 export function parseOption(option: string | undefined, type: OptionType): any {
-	if (option === undefined) return option;
+	// Undefined
+	if (option === undefined || option === null) return undefined;
+	// Number
 	if (type === OptionType.number) return Number(option);
+	// Boolean
 	if (type === OptionType.boolean) return option === "true";
+	// Objects
 	if (
 		type === OptionType.array ||
 		type === OptionType.object ||
@@ -60,20 +64,29 @@ export function parseOption(option: string | undefined, type: OptionType): any {
 	) {
 		try {
 			const result = JSON.parse(option);
-			if (typeof result !== "object")
+			// Check if is an object
+			if (typeof result !== "object") {
 				throw new ParseError(`The value is not an object.`, option);
-			if (type === OptionType.array) return Object.values(result);
-			if (type === OptionType.mapOfNumbers) {
-				const first = Object.values(result)?.[0] ?? 0;
-				if (typeof first !== "number")
-					throw new ParseError(`The value is not an map of numbers.`, option);
 			}
+			if (type === OptionType.array) {
+				// Array
+				return Object.values(result);
+			}
+			// Check if is a map of numbers, null and undefined are allowed
+			if (
+				type === OptionType.mapOfNumbers &&
+				Object.values(result).some((v) => v && typeof v !== "number")
+			) {
+				throw new ParseError(`The value is not an map of numbers.`, option);
+			}
+			// Object
 			return result;
 		} catch (e) {
 			console.error(`Invalid option value!\r\n`, e);
 			return undefined;
 		}
 	}
+	// String
 	return option;
 }
 
