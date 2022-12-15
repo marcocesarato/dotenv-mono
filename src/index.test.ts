@@ -5,26 +5,28 @@ describe("Dotenv Mono", () => {
 	let instance: Dotenv;
 	const originalEnv = process.env;
 
-	const rootContent = "TEST_ROOT_ENV=1";
-	const overwriteContent = "TEST_OVERWRITE_ENV=1";
-	const malformedContent = "TEST_MALFORMED_ENV";
-	const malformedEolContent = "TEST_MALFORMED_ENV\r\n";
-	const defaultsContent = "TEST_DEFAULT_ENV=1";
-	const webTestContent = "TEST_WEB_ENV=1";
+	const mockEnv = {
+		root: "TEST_ROOT_ENV=1",
+		overwrite: "TEST_OVERWRITE_ENV=1",
+		malformed: "TEST_MALFORMED_ENV",
+		malformedWithEol: "TEST_MALFORMED_ENV\r\n",
+		defaults: "TEST_DEFAULT_ENV=1",
+		webTest: "TEST_WEB_ENV=1",
+	};
 
 	beforeEach(() => {
 		process.env = {...originalEnv, NODE_ENV: "test"};
 		mockFs({
 			"/root": {
-				".env": rootContent,
+				".env": mockEnv.root,
 				".env.empty": "",
-				".env.overwrite": overwriteContent,
-				".env.defaults": defaultsContent,
-				".env.malformed": malformedContent,
-				".env.malformed.eol": malformedEolContent,
+				".env.overwrite": mockEnv.overwrite,
+				".env.defaults": mockEnv.defaults,
+				".env.malformed": mockEnv.malformed,
+				".env.malformed.eol": mockEnv.malformedWithEol,
 				"apps": {
 					"web": {
-						".env.test": webTestContent,
+						".env.test": mockEnv.webTest,
 					},
 				},
 			},
@@ -73,7 +75,7 @@ describe("Dotenv Mono", () => {
 		jest.spyOn(process, "cwd").mockReturnValue("/root/apps/web");
 		expect(() => instance.load()).not.toThrow();
 		const expected = {"TEST_WEB_ENV": "1", "TEST_DEFAULT_ENV": "1"};
-		expect(instance.plain).toEqual(webTestContent);
+		expect(instance.plain).toEqual(mockEnv.webTest);
 		expect(instance.env).toEqual(expected);
 		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
@@ -83,7 +85,7 @@ describe("Dotenv Mono", () => {
 		jest.spyOn(process, "cwd").mockReturnValue("/root/apps/web");
 		expect(() => instance.load()).not.toThrow();
 		const expected = {"TEST_ROOT_ENV": "1", "TEST_DEFAULT_ENV": "1"};
-		expect(instance.plain).toEqual(rootContent);
+		expect(instance.plain).toEqual(mockEnv.root);
 		expect(instance.env).toEqual(expected);
 		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
@@ -92,7 +94,7 @@ describe("Dotenv Mono", () => {
 		instance.path = "/root/.env.overwrite";
 		expect(() => instance.load()).not.toThrow();
 		const expected = {"TEST_OVERWRITE_ENV": "1", "TEST_DEFAULT_ENV": "1"};
-		expect(instance.plain).toEqual(overwriteContent);
+		expect(instance.plain).toEqual(mockEnv.overwrite);
 		expect(instance.env).toEqual(expected);
 		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
@@ -103,7 +105,7 @@ describe("Dotenv Mono", () => {
 		};
 		expect(() => instance.load()).not.toThrow();
 		const expected = {"TEST_OVERWRITE_ENV": "1", "TEST_DEFAULT_ENV": "1"};
-		expect(instance.plain).toEqual(overwriteContent);
+		expect(instance.plain).toEqual(mockEnv.overwrite);
 		expect(instance.env).toEqual(expected);
 		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
@@ -112,7 +114,7 @@ describe("Dotenv Mono", () => {
 		instance.extension = "overwrite";
 		expect(() => instance.load()).not.toThrow();
 		const expected = {"TEST_OVERWRITE_ENV": "1", "TEST_DEFAULT_ENV": "1"};
-		expect(instance.plain).toEqual(overwriteContent);
+		expect(instance.plain).toEqual(mockEnv.overwrite);
 		expect(instance.env).toEqual(expected);
 		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
@@ -146,7 +148,7 @@ describe("Dotenv Mono", () => {
 		expect(instance.loadFile).toBeDefined();
 		expect(() => instance.loadFile()).not.toThrow();
 		const expected = {"TEST_ROOT_ENV": "1", "TEST_DEFAULT_ENV": "1"};
-		expect(instance.plain).toEqual(rootContent);
+		expect(instance.plain).toEqual(mockEnv.root);
 		expect(instance.env).not.toEqual(expected);
 		expect(process.env).not.toEqual(expect.objectContaining(expected));
 	});
