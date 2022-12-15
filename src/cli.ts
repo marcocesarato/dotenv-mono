@@ -12,8 +12,9 @@ export enum OptionType {
 	boolean,
 	number,
 	string,
-	object,
 	array,
+	object,
+	mapOfNumbers,
 }
 
 /**
@@ -29,8 +30,18 @@ export const DotenvOptionsType: GenericObject<OptionType> = {
 	extension: OptionType.string,
 	path: OptionType.string,
 	override: OptionType.boolean,
-	priorities: OptionType.object,
+	priorities: OptionType.mapOfNumbers,
 };
+
+/**
+ * Parse error.
+ */
+class ParseError extends Error {
+	constructor(message: string, option: string = "") {
+		super(`${message} Parsed value: ${option}`);
+		this.name = "ParseError";
+	}
+}
 
 /**
  * Parse CLI parameter type.
@@ -42,15 +53,24 @@ export function parseOption(option: string | undefined, type: OptionType): any {
 	if (option === undefined) return option;
 	if (type === OptionType.number) return Number(option);
 	if (type === OptionType.boolean) return option === "true";
-	if (type === OptionType.object || type === OptionType.array) {
+	if (
+		type === OptionType.array ||
+		type === OptionType.object ||
+		type === OptionType.mapOfNumbers
+	) {
 		try {
 			const result = JSON.parse(option);
-			if (typeof result !== "object") throw new Error("The parsed value is not an object.");
+			if (typeof result !== "object")
+				throw new ParseError(`The value is not an object.`, option);
 			if (type === OptionType.array) return Object.values(result);
+			if (type === OptionType.mapOfNumbers) {
+				const first = Object.values(result)?.[0] ?? 0;
+				if (typeof first !== "number")
+					throw new ParseError(`The value is not an map of numbers.`, option);
+			}
 			return result;
 		} catch (e) {
-			console.debug("Value:", option);
-			console.error("Invalid option value!", e);
+			console.error(`Invalid option value!\r\n`, e);
 			return undefined;
 		}
 	}
