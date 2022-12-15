@@ -63,8 +63,11 @@ describe("Parse Option", () => {
 		expect(parseOption("false", OptionType.boolean)).toBeFalse();
 		expect(parseOption("message", OptionType.string)).toEqual("message");
 		expect(parseOption('{"value": 1}', OptionType.object)).toEqual({"value": 1});
-		expect(parseOption('{"value": 1}', OptionType.mapOfNumbers)).toEqual({"value": 1});
 		expect(parseOption("[1, 2]", OptionType.array)).toEqual([1, 2]);
+		expect(parseOption('{"value": 1, "empty": null}', OptionType.mapOfNumbers)).toEqual({
+			"value": 1,
+			"empty": null,
+		});
 		// Wrong JSON data
 		jest.spyOn(console, "error").mockImplementationOnce(() => {});
 		expect(parseOption("1", OptionType.object)).toBeUndefined();
