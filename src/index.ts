@@ -226,7 +226,7 @@ export class Dotenv {
 	 * Set extension.
 	 */
 	public set extension(value: string | undefined) {
-		if (value != null) this.#_extension = value;
+		if (value != null) this.#_extension = value.replace(/^\.+/, "").replace(/\.+$/, "");
 	}
 
 	/**
