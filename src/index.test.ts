@@ -157,8 +157,20 @@ describe("Dotenv Mono", () => {
 
 	it("should save changes", () => {
 		expect(() => instance.loadFile()).not.toThrow();
-		expect(() => instance.save({"TEST_CHANGES_ENV": "1", "TEST_ROOT_ENV": "2"})).not.toThrow();
-		expect(instance.plain).toIncludeMultiple(["TEST_CHANGES_ENV=1", "TEST_ROOT_ENV=2"]);
+		expect(() =>
+			instance.save({
+				"TEST_ROOT_ENV": "2",
+				"TEST_CHANGES_1_ENV": "10",
+				"TEST_CHANGES_2_ENV": "enjoy",
+				"TEST_CHANGES_3_ENV": "'enjoy quotes'",
+			}),
+		).not.toThrow();
+		expect(instance.plain).toIncludeMultiple([
+			"TEST_ROOT_ENV=2",
+			"TEST_CHANGES_1_ENV=10",
+			"TEST_CHANGES_2_ENV=enjoy",
+			"TEST_CHANGES_3_ENV='enjoy quotes'",
+		]);
 	});
 
 	it("should save changes on empty dotenv", () => {
