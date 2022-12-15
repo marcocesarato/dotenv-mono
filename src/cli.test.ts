@@ -63,14 +63,15 @@ describe("Parse Option", () => {
 		expect(parseOption("false", OptionType.boolean)).toBeFalse();
 		expect(parseOption("message", OptionType.string)).toEqual("message");
 		expect(parseOption('{"value": 1}', OptionType.object)).toEqual({"value": 1});
+		expect(parseOption('{"value": 1}', OptionType.mapOfNumbers)).toEqual({"value": 1});
 		expect(parseOption("[1, 2]", OptionType.array)).toEqual([1, 2]);
-		// Malformed JSON parsing
-		jest.spyOn(console, "debug").mockImplementationOnce(() => {});
-		jest.spyOn(console, "error").mockImplementationOnce(() => {});
-		expect(parseOption('{"malformed": 1]]', OptionType.object)).toBeUndefined();
 		// Wrong JSON data
-		jest.spyOn(console, "debug").mockImplementationOnce(() => {});
 		jest.spyOn(console, "error").mockImplementationOnce(() => {});
 		expect(parseOption("1", OptionType.object)).toBeUndefined();
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(parseOption('{"value": "string"}', OptionType.mapOfNumbers)).toBeUndefined();
+		// Malformed JSON parsing
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(parseOption('{"malformed": 1]]', OptionType.object)).toBeUndefined();
 	});
 });
