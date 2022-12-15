@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.8](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.7...v1.3.8) (2022-12-15)
+
+### Bug Fixes
+
+-   trim dots on extension config ([0e4fda8](https://github.com/marcocesarato/dotenv-mono/commit/0e4fda87ef8dd9f28bfb81ec0e63b684d92fc8b4))
+
 ### [1.3.7](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.6...v1.3.7) (2022-12-15)
 
 ### [1.3.6](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.5...v1.3.6) (2022-11-30)
