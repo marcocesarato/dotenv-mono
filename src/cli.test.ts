@@ -68,5 +68,9 @@ describe("Parse Option", () => {
 		jest.spyOn(console, "debug").mockImplementationOnce(() => {});
 		jest.spyOn(console, "error").mockImplementationOnce(() => {});
 		expect(parseOption('{"malformed": 1]]', OptionType.object)).toBeUndefined();
+		// Wrong JSON data
+		jest.spyOn(console, "debug").mockImplementationOnce(() => {});
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(parseOption("1", OptionType.object)).toBeUndefined();
 	});
 });
