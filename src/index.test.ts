@@ -1,6 +1,11 @@
 import Dotenv, {dotenvLoad, dotenvConfig, load, config} from "./index";
 import mockFs from "mock-fs";
 
+/**
+ * Generic object.
+ */
+type GenericObject<T = any> = {[key: string]: T};
+
 describe("Dotenv Mono", () => {
 	let instance: Dotenv;
 	const originalEnv = process.env;
@@ -159,48 +164,46 @@ describe("Dotenv Mono", () => {
 
 	it("should save changes", () => {
 		expect(() => instance.loadFile()).not.toThrow();
-		expect(() =>
-			instance.save({
-				"TEST_ROOT_ENV": "2",
-				"TEST_CHANGES_1_ENV": "10",
-				"TEST_CHANGES_2_ENV": "enjoy",
-				"TEST_CHANGES_3_ENV": "'enjoy quotes'",
-			}),
-		).not.toThrow();
-		expect(instance.plain).toIncludeMultiple([
-			"TEST_ROOT_ENV=2",
-			"TEST_CHANGES_1_ENV=10",
-			"TEST_CHANGES_2_ENV=enjoy",
-			"TEST_CHANGES_3_ENV='enjoy quotes'",
-		]);
+		const changes = {
+			"TEST_ROOT_ENV": "2",
+			"TEST_CHANGES_1_ENV": "10",
+			"TEST_CHANGES_2_ENV": "enjoy",
+			"TEST_CHANGES_3_ENV": "'enjoy quotes'",
+		};
+		expect(() => instance.save(changes)).not.toThrow();
+		expect(instance.plain).toIncludeMultiple(toStringArray(changes));
 	});
 
 	it("should save changes on empty dotenv", () => {
 		instance.path = "/root/.env.empty";
+		const changes = {"TEST_CHANGES_ENV": "1", "TEST_ROOT_ENV": "2"};
 		expect(() => instance.loadFile()).not.toThrow();
-		expect(() => instance.save({"TEST_CHANGES_ENV": "1", "TEST_ROOT_ENV": "2"})).not.toThrow();
-		expect(instance.plain).toIncludeMultiple(["TEST_CHANGES_ENV=1", "TEST_ROOT_ENV=2"]);
+		expect(() => instance.save(changes)).not.toThrow();
+		expect(instance.plain).toIncludeMultiple(toStringArray(changes));
 	});
 
 	it("should save changes on malformed dotenv", () => {
 		instance.path = "/root/.env.malformed";
+		const changes = {"TEST_CHANGES_ENV": "1", "TEST_ROOT_ENV": "2"};
 		expect(() => instance.loadFile()).not.toThrow();
-		expect(() => instance.save({"TEST_CHANGES_ENV": "1", "TEST_ROOT_ENV": "2"})).not.toThrow();
-		expect(instance.plain).toIncludeMultiple(["TEST_CHANGES_ENV=1", "TEST_ROOT_ENV=2"]);
+		expect(() => instance.save(changes)).not.toThrow();
+		expect(instance.plain).toIncludeMultiple(toStringArray(changes));
 	});
 
 	it("should save changes on malformed with ends eol dotenv", () => {
 		instance.path = "/root/.env.malformed.eol";
+		const changes = {"TEST_CHANGES_ENV": "1"};
 		expect(() => instance.loadFile()).not.toThrow();
-		expect(() => instance.save({"TEST_CHANGES_ENV": "1"})).not.toThrow();
-		expect(instance.plain).toInclude("TEST_CHANGES_ENV=1");
+		expect(() => instance.save(changes)).not.toThrow();
+		expect(instance.plain).toIncludeMultiple(toStringArray(changes));
 	});
 
 	it("should not save changes on not existing file", () => {
 		jest.spyOn(process, "cwd").mockReturnValue("/not/");
 		instance.path = "/not/.exists";
+		const changes = {"TEST_CHANGES_ENV": "1"};
 		expect(() => instance.loadFile()).not.toThrow();
-		expect(() => instance.save({"TEST_CHANGES_ENV": "1"})).not.toThrow();
+		expect(() => instance.save(changes)).not.toThrow();
 		expect(instance.plain).toBeEmpty();
 	});
 
@@ -231,3 +234,11 @@ describe("Dotenv Mono", () => {
 		expect(output.parsed).not.toBeEmptyObject();
 	});
 });
+
+function toStringArray(object: GenericObject): string[] {
+	const result: string[] = [];
+	Object.entries(object).forEach(([key, value]) => {
+		result.push(`${key}=${value}`);
+	});
+	return result;
+}
