@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.9](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.8...v1.3.9) (2022-12-22)
+
+### Bug Fixes
+
+-   add parse option map of number validator on cli ([c606608](https://github.com/marcocesarato/dotenv-mono/commit/c60660834e1b3d0e40bd876df4628ff893d2d67e))
+-   **deps:** update dependency dotenv-expand to v10 ([c6ef9a6](https://github.com/marcocesarato/dotenv-mono/commit/c6ef9a6f7ae17f54e43f5e06fb4202eeb802e598))
+-   improve map of numbers parsed option check on cli ([e029e4e](https://github.com/marcocesarato/dotenv-mono/commit/e029e4e5759350ac47634f7a80ec604233969577))
+
 ### [1.3.8](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.7...v1.3.8) (2022-12-15)
 
 ### Bug Fixes
