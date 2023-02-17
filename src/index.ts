@@ -355,17 +355,22 @@ export class Dotenv {
 		defaults: boolean = false,
 	): void {
 		if (!file || !fs.existsSync(file)) return;
-		if (loadOnProcess) {
-			let config = dotenv.config({
-				path: file,
-				debug: this.debug,
-				encoding: this.encoding,
-				override: !defaults && this.override,
-			});
-			if (this.expand) config = dotenvExpand.expand(config);
-			this.mergeDotenvConfig(config);
-		}
-		if (!defaults) this.plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
+		const plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
+		const config = loadOnProcess
+			? dotenv.config({
+					path: file,
+					debug: this.debug,
+					encoding: this.encoding,
+					override: !defaults && this.override,
+			  })
+			: {
+					parsed: this.parse(plain),
+					ignoreProcessEnv: true,
+			  };
+
+		if (this.expand) dotenvExpand.expand(config);
+		this.mergeDotenvConfig(config);
+		if (!defaults) this.plain = plain;
 	}
 
 	/**
