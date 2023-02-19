@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [1.3.10](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.9...v1.3.10) (2023-02-19)
 
+### Bug Fixes
+
+-   load file fills in the object fields from the loaded file ([62cab2c](https://github.com/marcocesarato/dotenv-mono/commit/62cab2cda4bbc3fc4add736465fc368c610f4b1e))
+
 ### [1.3.9](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.8...v1.3.9) (2022-12-22)
 
 ### Bug Fixes
