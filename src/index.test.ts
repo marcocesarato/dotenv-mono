@@ -154,7 +154,7 @@ describe("Dotenv Mono", () => {
 		expect(() => instance.loadFile()).not.toThrow();
 		const expected = {"TEST_ROOT_ENV": "1", "TEST_DEFAULT_ENV": "1"};
 		expect(instance.plain).toEqual(mockEnv.root);
-		expect(instance.env).not.toEqual(expected);
+		expect(instance.env).toEqual(expected);
 		expect(process.env).not.toEqual(expect.objectContaining(expected));
 	});
 
