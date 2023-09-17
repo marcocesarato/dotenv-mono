@@ -426,10 +426,11 @@ export class Dotenv {
 	 * @returns paths found
 	 */
 	private dotenvMatcher(dotenv: string | null | undefined, cwd: string): DotenvMatcherResult {
-		const priority = -1;
+		let priority = -1;
 		Object.keys(this.priorities).forEach((fileName) => {
 			if (this.priorities[fileName] > priority && fs.existsSync(path.join(cwd, fileName))) {
 				dotenv = path.join(cwd, fileName);
+				priority = this.priorities[fileName];
 			}
 		});
 		const foundPath = dotenv != null ? cwd : null;
