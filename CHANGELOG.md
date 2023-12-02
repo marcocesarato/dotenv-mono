@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.13](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.12...v1.3.13) (2023-12-02)
+
+### Bug Fixes
+
+-   **deps:** fix package exports, default must be last ([100053f](https://github.com/marcocesarato/dotenv-mono/commit/100053f7c589073b1c1ee30159dc6c2055f57e5c))
+
 ### [1.3.12](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.11...v1.3.12) (2023-09-17)
 
 ### [1.3.11](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.10...v1.3.11) (2023-06-19)
