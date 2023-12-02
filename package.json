@@ -8,9 +8,9 @@
 	"author": "Marco Cesarato <cesarato.developer@gmail.com>",
 	"exports": {
 		".": {
-			"default": "./dist/index.js",
 			"require": "./dist/index.js",
-			"types": "./dist/index.d.ts"
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
 		},
 		"./load": "./dist/load.js",
 		"./package.json": "./package.json"
