@@ -362,11 +362,11 @@ export class Dotenv {
 					debug: this.debug,
 					encoding: this.encoding,
 					override: !defaults && this.override,
-			  })
+				})
 			: {
 					parsed: this.parse(plain),
 					ignoreProcessEnv: true,
-			  };
+				};
 
 		if (this.expand) dotenvExpand.expand(config);
 		this.mergeDotenvConfig(config);
