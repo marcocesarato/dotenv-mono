@@ -6,6 +6,9 @@
 	"types": "./dist/index.d.ts",
 	"description": "This package permit to have a centralized dotenv on a monorepo. It also includes some extra features such as manipulation and saving of changes to the dotenv file, a default centralized file, and a file loader with ordering and priorities.",
 	"author": "Marco Cesarato <cesarato.developer@gmail.com>",
+	"bin": {
+		"dotenv": "./dist/cli.js"
+	},
 	"exports": {
 		".": {
 			"require": "./dist/index.js",
@@ -35,8 +38,8 @@
 		"coverage": "jest --coverage && start coverage/index.html"
 	},
 	"dependencies": {
-		"dotenv": "^16.3.1",
-		"dotenv-expand": "^10.0.0"
+		"dotenv": "^16.4.5",
+		"dotenv-expand": "^11.0.6"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.5.2",
