@@ -17,6 +17,8 @@ describe("Dotenv Mono", () => {
 		malformedWithEol: "TEST_MALFORMED_ENV\r\n",
 		defaults: "TEST_DEFAULT_ENV=1",
 		webTest: "TEST_WEB_ENV=1",
+		parent: "PARENT_ENV=1",
+		child: "CHILD_ENV=1",
 	};
 
 	beforeEach(() => {
@@ -33,6 +35,12 @@ describe("Dotenv Mono", () => {
 					"web": {
 						".env.test": mockEnv.webTest,
 					},
+				},
+			},
+			"/parent": {
+				".env": mockEnv.parent,
+				"child": {
+					".env": mockEnv.child,
 				},
 			},
 		});
@@ -120,6 +128,14 @@ describe("Dotenv Mono", () => {
 		expect(() => instance.load()).not.toThrow();
 		const expected = {"TEST_OVERWRITE_ENV": "1", "TEST_DEFAULT_ENV": "1"};
 		expect(instance.plain).toEqual(mockEnv.overwrite);
+		expect(instance.env).toEqual(expected);
+		expect(process.env).toEqual(expect.objectContaining(expected));
+	});
+
+	it("should prefer the nearer of two .env files with the same priority", () => {
+		jest.spyOn(process, "cwd").mockReturnValue("/parent/child");
+		expect(() => instance.load()).not.toThrow();
+		const expected = {"CHILD_ENV": "1"};
 		expect(instance.env).toEqual(expected);
 		expect(process.env).toEqual(expect.objectContaining(expected));
 	});
