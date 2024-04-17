@@ -365,7 +365,7 @@ export class Dotenv {
 				})
 			: {
 					parsed: this.parse(plain),
-					ignoreProcessEnv: true,
+					processEnv: {},
 				};
 
 		if (this.expand) dotenvExpand.expand(config);
