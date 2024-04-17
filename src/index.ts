@@ -405,14 +405,13 @@ export class Dotenv {
 		let directory = path.resolve(this.cwd);
 		const {root} = path.parse(directory);
 		let depth = 0;
-		let match = false;
 		while (depth < this.depth) {
 			depth++;
 			const {foundPath, foundDotenv} = matcher(dotenv, directory);
 			dotenv = foundDotenv;
-			if (match) break;
-			if (foundPath) match = true;
-			if (directory === root) break;
+			if (foundPath || directory === root) {
+				break;
+			}
 			directory = path.dirname(directory);
 		}
 		return dotenv;
