@@ -24,6 +24,9 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
+            - name: Clean install environment
+              run: |
+                rm -rf node_modules package-lock.json
             - name: Install dependencies
               run: npm ci
             - name: Build production bundle
