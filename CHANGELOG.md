@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [1.3.17](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.14...v1.3.17) (2025-07-16)
 
+- Changed license to BSD-2-Clause
+- Improved tests for some edge cases
+
 ### Bug Fixes
 
 - improve code structure for improved readability and maintainability ([76e2de8](https://github.com/marcocesarato/dotenv-mono/commit/76e2de8aaa545b4268a14b94b1ce1eaaeb0af597))
