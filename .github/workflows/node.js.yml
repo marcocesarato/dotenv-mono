@@ -25,8 +25,7 @@ jobs:
               with:
                   node-version: ${{ matrix.node-version }}
             - name: Clean install environment
-              run: |
-                rm -rf node_modules package-lock.json
+              run: rm -rf node_modules
             - name: Install dependencies
               run: npm ci
             - name: Build production bundle
