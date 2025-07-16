@@ -65,21 +65,37 @@ export function parseOption(option: string | undefined, type: OptionType): unkno
 		type === OptionType.mapOfNumbers
 	) {
 		try {
-			const result = JSON.parse(option);
-			// Check if is an object
-			if (typeof result !== "object") {
+			// For mapOfNumbers, we need to handle undefined values specially
+			// since JSON doesn't support undefined, we'll preprocess the string
+			let processedOption = option;
+			if (type === OptionType.mapOfNumbers) {
+				// Remove undefined values completely from the JSON string
+				processedOption = option.replace(/,\s*"[^"]*":\s*undefined/g, "");
+				processedOption = processedOption.replace(/"[^"]*":\s*undefined\s*,/g, "");
+				processedOption = processedOption.replace(/{\s*"[^"]*":\s*undefined\s*}/g, "{}");
+			}
+
+			const result = JSON.parse(processedOption);
+			// For arrays, we need to allow Array objects
+			if (type === OptionType.array) {
+				// Array check
+				if (!Array.isArray(result)) {
+					throw new ParseError(`The value is not an array.`, option);
+				}
+				return result;
+			}
+			// For other object types, reject arrays
+			if (typeof result !== "object" || Array.isArray(result)) {
 				throw new ParseError(`The value is not an object.`, option);
 			}
-			if (type === OptionType.array) {
-				// Array
-				return Object.values(result);
-			}
 			// Check if is a map of numbers, null and undefined are allowed
-			if (
-				type === OptionType.mapOfNumbers &&
-				Object.values(result).some((v) => v && typeof v !== "number")
-			) {
-				throw new ParseError(`The value is not an map of numbers.`, option);
+			if (type === OptionType.mapOfNumbers) {
+				for (const [_key, value] of Object.entries(result)) {
+					if (value !== null && typeof value !== "number") {
+						throw new ParseError(`The value is not an map of numbers.`, option);
+					}
+				}
+				return result;
 			}
 			// Object
 			return result;
@@ -109,14 +125,15 @@ export function runCli(runner: (config: DotenvConfig) => unknown): unknown {
 	// CLI Parameter configuration parser
 	const args: string[] = process.argv;
 	const keys: string = Object.keys(DotenvOptionsType).join("|");
-	const re = new RegExp(`^dotenv_config_(${keys})=(.*?)$`, "g");
+	const re = new RegExp(`^dotenv_config_(${keys})=(.*)$`, "i");
 	const cliOptions = args.reduce(function (opts, cur) {
-		const matches = cur.match(re);
+		const matches = re.exec(cur);
 		if (matches) {
 			const option = String(matches[1]).trim();
 			const match = String(matches[2]).trim();
 			opts[option] = parseOption(match, DotenvOptionsType[option]);
 		}
+		re.lastIndex = 0; // Reset regex for next iteration
 		return opts;
 	}, {} as GenericObject) as DotenvConfig;
 	// Run command

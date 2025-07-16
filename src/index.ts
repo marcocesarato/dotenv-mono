@@ -355,22 +355,28 @@ export class Dotenv {
 		defaults: boolean = false,
 	): void {
 		if (!file || !fs.existsSync(file)) return;
-		const plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
-		const config = loadOnProcess
-			? dotenv.config({
-					path: file,
-					debug: this.debug,
-					encoding: this.encoding,
-					override: !defaults && this.override,
-				})
-			: {
-					parsed: this.parse(plain),
-					processEnv: {},
-				};
+		try {
+			const plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
+			const config = loadOnProcess
+				? dotenv.config({
+						path: file,
+						debug: this.debug,
+						encoding: this.encoding,
+						override: !defaults && this.override,
+					})
+				: {
+						parsed: this.parse(plain),
+						processEnv: {},
+					};
 
-		if (this.expand) dotenvExpand.expand(config);
-		this.mergeDotenvConfig(config);
-		if (!defaults) this.plain = plain;
+			if (this.expand) dotenvExpand.expand(config);
+			this.mergeDotenvConfig(config);
+			if (!defaults) this.plain = plain;
+		} catch (error) {
+			if (this.debug) {
+				console.error(`Error loading dotenv file: ${file}`, error);
+			}
+		}
 	}
 
 	/**
@@ -525,6 +531,13 @@ export class Dotenv {
 			encoding: this.encoding,
 		});
 		this.plain = data;
+		// Update env with new changes
+		Object.keys(changes).forEach((key) => {
+			const value = changes[key];
+			if (value !== undefined && value !== null) {
+				this.env[key] = String(value);
+			}
+		});
 		return this;
 	}
 
