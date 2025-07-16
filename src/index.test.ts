@@ -1,4 +1,5 @@
 import Dotenv, {dotenvLoad, dotenvConfig, load, config, DotenvMatcher, DotenvData} from "./index";
+import {runCli} from "./cli";
 import mockFs from "mock-fs";
 import fs from "fs";
 import path from "path";
@@ -754,6 +755,578 @@ describe("Dotenv Mono", () => {
 		expect(preserveInstance.plain).toInclude("EXISTING=updated_value");
 		expect(preserveInstance.plain).toInclude("NEW_VAR=new_value");
 		expect(preserveInstance.plain).toInclude("OTHER=other");
+	});
+
+	it("should handle file loading errors with debug mode", () => {
+		// Create a mock instance with debug mode enabled
+		const debugInstance = new Dotenv({debug: true, cwd: "/root", path: "/root/.env"});
+
+		// Mock console.error to capture error output
+		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+		// Mock fs.readFileSync to throw an error
+		const originalReadFileSync = fs.readFileSync;
+		jest.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
+			throw new Error("Simulated file read error");
+		});
+
+		// This should trigger the error handling path in loadDotenv
+		debugInstance.loadFile();
+
+		// Verify that console.error was called with debug mode on
+		expect(consoleErrorSpy).toHaveBeenCalledWith(
+			"Error loading dotenv file: /root/.env",
+			expect.any(Error),
+		);
+
+		// Restore mocks
+		jest.spyOn(fs, "readFileSync").mockImplementation(originalReadFileSync);
+		consoleErrorSpy.mockRestore();
+	});
+
+	// Edge cases for defaults not overriding main environment variables
+	it("should not allow defaults to override main environment variables", () => {
+		mockFs({
+			"/defaults-test": {
+				".env": "SHARED_VAR=main_value\nMAIN_ONLY=main",
+				".env.defaults": "SHARED_VAR=default_value\nDEFAULT_ONLY=default",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/defaults-test");
+		const instance = new Dotenv({cwd: "/defaults-test"});
+		instance.load();
+
+		expect(instance.env.SHARED_VAR).toBe("main_value"); // Main should win
+		expect(instance.env.MAIN_ONLY).toBe("main");
+		expect(instance.env.DEFAULT_ONLY).toBe("default"); // Default should fill gaps
+	});
+
+	// Edge cases for realistic monorepo structure
+	it("should work in realistic monorepo structure", () => {
+		mockFs({
+			"/monorepo": {
+				".env": "ROOT_VAR=root",
+				".env.production": "PROD_VAR=prod",
+				".env.defaults": "DEFAULT_VAR=default",
+				"packages": {
+					"ui-lib": {},
+					"other-lib": {},
+				},
+				"apps": {
+					"web": {},
+					"docs": {
+						".env.local": "DOCS_VAR=docs",
+					},
+				},
+			},
+		});
+
+		// Test from apps/web - should find root .env
+		process.env.NODE_ENV = "development";
+		jest.spyOn(process, "cwd").mockReturnValue("/monorepo/apps/web");
+		const webInstance = new Dotenv({cwd: "/monorepo/apps/web"});
+		webInstance.load();
+
+		expect(webInstance.env.ROOT_VAR).toBe("root");
+		expect(webInstance.env.DEFAULT_VAR).toBe("default");
+
+		// Test from apps/docs - should find docs .env.local (higher priority)
+		jest.spyOn(process, "cwd").mockReturnValue("/monorepo/apps/docs");
+		const docsInstance = new Dotenv({cwd: "/monorepo/apps/docs"});
+		docsInstance.load();
+
+		expect(docsInstance.env.DOCS_VAR).toBe("docs");
+		expect(docsInstance.env.DEFAULT_VAR).toBe("default");
+		expect(docsInstance.env.ROOT_VAR).toBeUndefined(); // Should prefer closer file
+	});
+
+	// Edge cases for priority conflicts with multiple files at different levels
+	it("should handle priority conflicts correctly across directory levels", () => {
+		mockFs({
+			"/priority-levels": {
+				".env": "ROOT_BASE=root_base",
+				".env.test": "ROOT_TEST=root_test",
+				"level1": {
+					".env": "L1_BASE=l1_base",
+					"level2": {
+						".env.test.local": "L2_TEST_LOCAL=l2_test_local",
+					},
+				},
+			},
+		});
+
+		process.env.NODE_ENV = "test";
+		jest.spyOn(process, "cwd").mockReturnValue("/priority-levels/level1/level2");
+
+		const instance = new Dotenv({cwd: "/priority-levels/level1/level2"});
+		instance.load();
+
+		// Should find .env.test.local at level2 (priority 75, depth 0)
+		// Over .env.test at root (priority 25, depth 2)
+		// Over .env at level1 (priority 1, depth 1)
+		expect(instance.env.L2_TEST_LOCAL).toBe("l2_test_local");
+		expect(instance.env.ROOT_TEST).toBeUndefined();
+		expect(instance.env.L1_BASE).toBeUndefined();
+	});
+
+	// Edge cases for extension with priorities
+	it("should handle extension with complex priority scenarios", () => {
+		mockFs({
+			"/extension-priority": {
+				".env": "BASE=base",
+				".env.server": "SERVER=server",
+				".env.server.test": "SERVER_TEST=server_test",
+				".env.server.test.local": "SERVER_TEST_LOCAL=server_test_local",
+			},
+		});
+
+		process.env.NODE_ENV = "test";
+		jest.spyOn(process, "cwd").mockReturnValue("/extension-priority");
+
+		const instance = new Dotenv({cwd: "/extension-priority", extension: "server"});
+		instance.load();
+
+		// Should load .env.server.test.local (priority 75)
+		expect(instance.env.SERVER_TEST_LOCAL).toBe("server_test_local");
+		expect(instance.env.SERVER_TEST).toBeUndefined();
+		expect(instance.env.SERVER).toBeUndefined();
+		expect(instance.env.BASE).toBeUndefined();
+	});
+
+	// Edge cases for depth limitations with priority files
+	it("should respect depth limit even when higher priority files exist deeper", () => {
+		mockFs({
+			"/depth-test": {
+				".env.test.local": "DEEP_HIGH_PRIORITY=deep_high",
+				"l1": {
+					".env": "L1_BASE=l1_base",
+					"l2": {
+						".env": "L2_BASE=l2_base",
+						"l3": {
+							// Empty directory - start search from here
+						},
+					},
+				},
+			},
+		});
+
+		process.env.NODE_ENV = "test";
+		jest.spyOn(process, "cwd").mockReturnValue("/depth-test/l1/l2/l3");
+
+		const instance = new Dotenv({cwd: "/depth-test/l1/l2/l3", depth: 2});
+		instance.load();
+
+		// Should find .env at l2 (depth 1 from l3)
+		// Should NOT find .env.test.local at root (depth 3 from l3, beyond limit)
+		expect(instance.env.L2_BASE).toBe("l2_base");
+		expect(instance.env.DEEP_HIGH_PRIORITY).toBeUndefined();
+	});
+
+	// Edge cases for malformed priority configuration
+	it("should handle malformed priority configuration gracefully", () => {
+		const instance = new Dotenv({
+			priorities: {
+				".env.malformed": -1, // Negative priority
+				".env.zero": 0, // Zero priority
+				"": 100, // Empty filename
+				".env.valid": 50,
+			},
+		});
+
+		// Should still work with valid priorities
+		expect(instance.priorities[".env.valid"]).toBe(50);
+		expect(instance.priorities[".env.malformed"]).toBe(-1);
+		expect(instance.priorities[".env.zero"]).toBe(0);
+	});
+
+	// Edge cases for override behavior with process.env
+	it("should handle override behavior correctly with existing process.env", () => {
+		process.env.EXISTING_PROCESS_VAR = "process_value";
+		process.env.SHARED_VAR = "process_shared";
+
+		mockFs({
+			"/override-test": {
+				".env": "EXISTING_PROCESS_VAR=dotenv_value\nSHARED_VAR=dotenv_shared\nNEW_VAR=new",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/override-test");
+
+		// Test without override
+		const noOverrideInstance = new Dotenv({cwd: "/override-test", override: false});
+		noOverrideInstance.load();
+		expect(process.env.EXISTING_PROCESS_VAR).toBe("process_value");
+		expect(process.env.SHARED_VAR).toBe("process_shared");
+		expect(process.env.NEW_VAR).toBe("new");
+
+		// Test with override
+		const overrideInstance = new Dotenv({cwd: "/override-test", override: true});
+		overrideInstance.load();
+		expect(process.env.EXISTING_PROCESS_VAR).toBe("dotenv_value");
+		expect(process.env.SHARED_VAR).toBe("dotenv_shared");
+
+		// Clean up
+		delete process.env.EXISTING_PROCESS_VAR;
+		delete process.env.SHARED_VAR;
+		delete process.env.NEW_VAR;
+	});
+
+	// Edge cases for variable expansion with circular references
+	it("should handle variable expansion edge cases", () => {
+		mockFs({
+			"/expansion-test": {
+				".env": "BASE_VAR=base\nEXPANDED_VAR=${BASE_VAR}_expanded\nCIRCULAR_A=${CIRCULAR_B}\nCIRCULAR_B=${CIRCULAR_A}\nUNDEFINED_REF=${NONEXISTENT}\nNESTED_VAR=${EXPANDED_VAR}_nested",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/expansion-test");
+
+		const expandInstance = new Dotenv({cwd: "/expansion-test", expand: true});
+		expandInstance.load();
+
+		expect(expandInstance.env.BASE_VAR).toBe("base");
+		expect(expandInstance.env.EXPANDED_VAR).toBe("base_expanded");
+		expect(expandInstance.env.NESTED_VAR).toBe("base_expanded_nested");
+		// Circular references should be handled gracefully
+		expect(expandInstance.env.CIRCULAR_A).toBeDefined();
+		expect(expandInstance.env.CIRCULAR_B).toBeDefined();
+		// Undefined references should remain as-is or be handled
+		expect(expandInstance.env.UNDEFINED_REF).toBeDefined();
+	});
+
+	// Edge cases for file encoding issues
+	it("should handle different encodings correctly", () => {
+		const utf8Content = "UTF8_VAR=café";
+		const latin1Content = "LATIN1_VAR=caf\xe9"; // é in latin1
+
+		mockFs({
+			"/encoding-test": {
+				".env.utf8": utf8Content,
+				".env.latin1": latin1Content,
+			},
+		});
+
+		// Test UTF-8
+		const utf8Instance = new Dotenv({path: "/encoding-test/.env.utf8", encoding: "utf8"});
+		utf8Instance.loadFile();
+		expect(utf8Instance.env.UTF8_VAR).toBe("café");
+
+		// Test Latin1
+		const latin1Instance = new Dotenv({path: "/encoding-test/.env.latin1", encoding: "latin1"});
+		latin1Instance.loadFile();
+		expect(latin1Instance.env.LATIN1_VAR).toBeDefined();
+	});
+
+	// Edge cases for save with special line endings and formatting
+	it("should handle save with special line endings and formatting", () => {
+		mockFs({
+			"/formatting-test": {
+				".env": "VAR1=value1\r\nVAR2=value2\nVAR3=value3\r\n",
+			},
+		});
+
+		instance.path = "/formatting-test/.env";
+		instance.loadFile();
+
+		const changes = {
+			"VAR1": "updated1",
+			"NEW_VAR": "new",
+			"MULTILINE": "line1\nline2\r\nline3",
+		};
+
+		expect(() => instance.save(changes)).not.toThrow();
+		expect(instance.plain).toInclude("VAR1=updated1");
+		expect(instance.plain).toInclude("NEW_VAR=new");
+		expect(instance.plain).toInclude("MULTILINE=line1\\nline2\\r\\nline3");
+	});
+
+	// Edge cases for custom matchers
+	it("should handle custom matcher edge cases", () => {
+		const failingMatcher: DotenvMatcher = () => {
+			throw new Error("Matcher error");
+		};
+
+		const emptyMatcher: DotenvMatcher = () => ({
+			foundPath: null,
+			foundDotenv: null,
+		});
+
+		mockFs({
+			"/matcher-test": {
+				".env": "TEST=value",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/matcher-test");
+		const instance = new Dotenv({cwd: "/matcher-test"});
+
+		// Test with failing matcher
+		expect(() => instance.find(failingMatcher)).toThrow();
+
+		// Test with empty matcher
+		const result = instance.find(emptyMatcher);
+		expect(result).toBeNull();
+	});
+
+	// Edge cases for empty and whitespace-only files
+	it("should handle empty and whitespace-only dotenv files", () => {
+		mockFs({
+			"/empty-files": {
+				".env.empty": "",
+				".env.whitespace": "   \n  \r\n  \t  \n",
+				".env.comments": "# Only comments\n# Another comment",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/empty-files");
+
+		// Test empty file
+		const emptyInstance = new Dotenv({path: "/empty-files/.env.empty"});
+		emptyInstance.loadFile();
+		expect(emptyInstance.env).toEqual({});
+
+		// Test whitespace-only file
+		const whitespaceInstance = new Dotenv({path: "/empty-files/.env.whitespace"});
+		whitespaceInstance.loadFile();
+		expect(whitespaceInstance.env).toEqual({});
+
+		// Test comments-only file
+		const commentsInstance = new Dotenv({path: "/empty-files/.env.comments"});
+		commentsInstance.loadFile();
+		expect(commentsInstance.env).toEqual({});
+	});
+
+	// Edge cases for file permissions and access errors
+	it("should handle file access errors gracefully", () => {
+		// Mock fs.existsSync to return true but readFileSync to fail
+		const originalExistsSync = fs.existsSync;
+		const originalReadFileSync = fs.readFileSync;
+
+		jest.spyOn(fs, "existsSync").mockReturnValue(true);
+		jest.spyOn(fs, "readFileSync").mockImplementation(() => {
+			throw new Error("Permission denied");
+		});
+
+		const instance = new Dotenv({path: "/inaccessible/.env"});
+		expect(() => instance.loadFile()).not.toThrow();
+		expect(instance.env).toEqual({});
+
+		// Restore mocks
+		jest.spyOn(fs, "existsSync").mockImplementation(originalExistsSync);
+		jest.spyOn(fs, "readFileSync").mockImplementation(originalReadFileSync);
+	});
+
+	it("should handle CLI preload scenario simulation", () => {
+		// Simulate the CLI preload behavior mentioned in README
+		process.env.DOTENV_CONFIG_PATH = "/root/.env";
+		process.env.DOTENV_CONFIG_DEBUG = "true";
+
+		// Use the CLI functionality
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.debug).toBe(true);
+		expect(dotenv.path).toBe("/root/.env");
+
+		// Clean up
+		delete process.env.DOTENV_CONFIG_PATH;
+		delete process.env.DOTENV_CONFIG_DEBUG;
+	});
+	it("should handle very deep directory structures beyond reasonable limits", () => {
+		const deepPath = "/deep-root/" + "level/".repeat(20); // 20 levels deep
+
+		mockFs({
+			"/deep-root": {
+				".env": "DEEP_ROOT=root",
+				[`level/${"level/".repeat(19)}`]: {
+					// Very deep nested structure
+				},
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue(deepPath);
+		const deepInstance = new Dotenv({cwd: deepPath, depth: 25}); // Allow deep search
+		deepInstance.load();
+
+		expect(deepInstance.env.DEEP_ROOT).toBe("root");
+	});
+
+	it("should handle simultaneous file access scenarios", () => {
+		// Test concurrent access patterns that might occur in real applications
+		mockFs({
+			"/concurrent": {
+				".env": "CONCURRENT=value",
+				".env.defaults": "DEFAULT=default",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/concurrent");
+
+		// Create multiple instances that might access files simultaneously
+		const instance1 = new Dotenv({cwd: "/concurrent"});
+		const instance2 = new Dotenv({cwd: "/concurrent"});
+		const instance3 = new Dotenv({cwd: "/concurrent"});
+
+		// All should succeed without interference
+		expect(() => {
+			instance1.load();
+			instance2.loadFile();
+			instance3.load();
+		}).not.toThrow();
+
+		expect(instance1.env.CONCURRENT).toBe("value");
+		expect(instance2.env.CONCURRENT).toBe("value");
+		expect(instance3.env.CONCURRENT).toBe("value");
+	});
+
+	it("should handle binary data in dotenv files gracefully", () => {
+		// Create a file with binary data that could cause issues
+		const binaryContent = "NORMAL_VAR=value\nBINARY_VAR=\x00\x01\x02\xFF\nANOTHER_VAR=normal";
+
+		mockFs({
+			"/binary-test": {
+				".env": Buffer.from(binaryContent, "binary"),
+			},
+		});
+
+		const instance = new Dotenv({path: "/binary-test/.env"});
+		expect(() => instance.loadFile()).not.toThrow();
+
+		// Should parse what it can
+		expect(instance.env.NORMAL_VAR).toBe("value");
+		expect(instance.env.ANOTHER_VAR).toBe("normal");
+	});
+
+	it("should handle extremely large dotenv files", () => {
+		// Create a large file with many variables
+		const largeContent = Array.from({length: 1000}, (_, i) => `VAR_${i}=value_${i}`).join("\n");
+
+		mockFs({
+			"/large-test": {
+				".env": largeContent,
+			},
+		});
+
+		const instance = new Dotenv({path: "/large-test/.env"});
+		expect(() => instance.loadFile()).not.toThrow();
+
+		// Should handle all variables
+		expect(instance.env.VAR_0).toBe("value_0");
+		expect(instance.env.VAR_999).toBe("value_999");
+		expect(Object.keys(instance.env)).toHaveLength(1000);
+	});
+
+	it("should handle dotenv files with only whitespace and comments", () => {
+		const whitespaceOnlyContent = `
+# This is a comment
+   # Another comment with leading spaces
+	# Tab-indented comment
+
+   
+	
+# Final comment
+`;
+
+		mockFs({
+			"/whitespace-test": {
+				".env": whitespaceOnlyContent,
+			},
+		});
+
+		const instance = new Dotenv({path: "/whitespace-test/.env"});
+		expect(() => instance.loadFile()).not.toThrow();
+		expect(instance.env).toEqual({});
+		expect(instance.plain).toBe(whitespaceOnlyContent);
+	});
+
+	it("should handle edge cases in variable name validation", () => {
+		const edgeCaseContent = `
+NORMAL_VAR=value
+123_STARTS_WITH_NUMBER=invalid_but_parsed
+_STARTS_WITH_UNDERSCORE=valid
+CONTAINS-DASH=valid
+CONTAINS.DOT=valid
+CONTAINS SPACE=invalid_but_might_be_parsed
+UNICODE_名前=unicode_name
+EMPTY_VALUE=
+EQUALS_IN_NAME=WITH=EQUALS=value
+`;
+
+		mockFs({
+			"/edge-vars": {
+				".env": edgeCaseContent,
+			},
+		});
+
+		const instance = new Dotenv({path: "/edge-vars/.env"});
+		expect(() => instance.loadFile()).not.toThrow();
+
+		// Should handle various formats gracefully
+		expect(instance.env.NORMAL_VAR).toBe("value");
+		expect(instance.env._STARTS_WITH_UNDERSCORE).toBe("valid");
+		expect(instance.env.EMPTY_VALUE).toBe("");
+	});
+
+	it("should handle save operations with file system race conditions", () => {
+		mockFs({
+			"/race-test": {
+				".env": "ORIGINAL=value",
+			},
+		});
+
+		const instance = new Dotenv({path: "/race-test/.env"});
+		instance.loadFile();
+
+		// Simulate another process modifying the file during save
+		const originalWriteFileSync = fs.writeFileSync;
+		let callCount = 0;
+		jest.spyOn(fs, "writeFileSync").mockImplementation((path, data, options) => {
+			callCount++;
+			if (callCount === 1) {
+				// First call - simulate concurrent modification
+				originalWriteFileSync(path, "MODIFIED_BY_OTHER=other_value\n", options);
+			}
+			return originalWriteFileSync(path, data, options);
+		});
+
+		const changes = {"NEW_VAR": "new_value"};
+		expect(() => instance.save(changes)).not.toThrow();
+
+		// Restore mock
+		jest.spyOn(fs, "writeFileSync").mockImplementation(originalWriteFileSync);
+	});
+
+	it("should handle config inheritance and isolation between instances", () => {
+		const instance1 = new Dotenv({debug: true, depth: 5, expand: false});
+		const instance2 = new Dotenv({debug: false, depth: 2, expand: true});
+
+		// Instances should maintain their own config
+		expect(instance1.debug).toBe(true);
+		expect(instance1.depth).toBe(5);
+		expect(instance1.expand).toBe(false);
+
+		expect(instance2.debug).toBe(false);
+		expect(instance2.depth).toBe(2);
+		expect(instance2.expand).toBe(true);
+
+		// Modifying one shouldn't affect the other
+		instance1.debug = false;
+		expect(instance2.debug).toBe(false); // This should still be false
+
+		instance2.depth = 10;
+		expect(instance1.depth).toBe(5); // This should still be 5
+	});
+
+	it("should handle platform-specific path separators", () => {
+		const windowsPath = "C:\\Users\\test\\.env";
+		const unixPath = "/home/test/.env";
+
+		// Test Windows-style paths
+		const windowsInstance = new Dotenv({path: windowsPath});
+		expect(windowsInstance.path).toBe(windowsPath);
+
+		// Test Unix-style paths
+		const unixInstance = new Dotenv({path: unixPath});
+		expect(unixInstance.path).toBe(unixPath);
 	});
 });
 

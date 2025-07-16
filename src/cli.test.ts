@@ -193,4 +193,228 @@ describe("Parse Option", () => {
 		expect(parseOption("unicode: 你好", OptionType.string)).toBe("unicode: 你好");
 		expect(parseOption("", OptionType.string)).toBe("");
 	});
+
+	it("should handle null value as parameter", () => {
+		// Test null handling which is covered in the condition: option === null
+		expect(
+			parseOption(null as unknown as string | undefined, OptionType.string),
+		).toBeUndefined();
+		expect(
+			parseOption(null as unknown as string | undefined, OptionType.number),
+		).toBeUndefined();
+		expect(
+			parseOption(null as unknown as string | undefined, OptionType.boolean),
+		).toBeUndefined();
+		expect(
+			parseOption(null as unknown as string | undefined, OptionType.array),
+		).toBeUndefined();
+		expect(
+			parseOption(null as unknown as string | undefined, OptionType.object),
+		).toBeUndefined();
+		expect(
+			parseOption(null as unknown as string | undefined, OptionType.mapOfNumbers),
+		).toBeUndefined();
+	});
+
+	it("should reject non-array values for array type", () => {
+		// Test ParseError for non-array values
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(parseOption('{"key": "value"}', OptionType.array)).toBeUndefined();
+
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(parseOption('"string"', OptionType.array)).toBeUndefined();
+
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(parseOption("123", OptionType.array)).toBeUndefined();
+	});
+
+	it("should reject array values for object type", () => {
+		// Test ParseError for array values when expecting object
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(parseOption("[1, 2, 3]", OptionType.object)).toBeUndefined();
+
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+		expect(parseOption('["item1", "item2"]', OptionType.object)).toBeUndefined();
+	});
+
+	it("should handle mapOfNumbers preprocessing with undefined values", () => {
+		// Test the undefined value preprocessing in mapOfNumbers
+		expect(parseOption('{"a": 1, "b": undefined, "c": 2}', OptionType.mapOfNumbers)).toEqual({
+			"a": 1,
+			"c": 2,
+		});
+
+		expect(parseOption('{"first": undefined, "second": 42}', OptionType.mapOfNumbers)).toEqual({
+			"second": 42,
+		});
+
+		expect(parseOption('{"onlyUndefined": undefined}', OptionType.mapOfNumbers)).toEqual({});
+	});
+
+	// Additional CLI edge cases
+	it("should handle CLI options with special characters and formatting", () => {
+		// Mock console.error to suppress expected debug output
+		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+		process.argv = [
+			"node",
+			"script.js",
+			"dotenv_config_path=/path/with spaces/.env",
+			"dotenv_config_debug=true",
+			'dotenv_config_priorities={"custom.env": 100}',
+		];
+
+		expect(() => runCli(load)).not.toThrow();
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.debug).toBe(true);
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it("should handle mixed case and malformed CLI arguments", () => {
+		process.argv = [
+			"node",
+			"script.js",
+			"DOTENV_CONFIG_DEBUG=true", // Wrong case
+			"dotenv_config_=", // Empty option name
+			"=value", // No option name
+			"dotenv_config_depth=abc", // Invalid number
+			"dotenv_config_override=yes", // Invalid boolean
+		];
+
+		expect(() => runCli(load)).not.toThrow();
+		const dotenv = runCli(load) as Dotenv;
+		// Should only parse valid options
+		expect(dotenv.depth).toBeNaN(); // Invalid number becomes NaN
+		expect(dotenv.override).toBe(false); // Invalid boolean becomes false
+	});
+
+	it("should handle environment variables with empty values", () => {
+		process.env.DOTENV_CONFIG_PATH = "";
+		process.env.DOTENV_CONFIG_DEFAULTS = "";
+		process.env.DOTENV_CONFIG_EXTENSION = "";
+
+		expect(() => runCli(load)).not.toThrow();
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.path).toBe("");
+		expect(dotenv.defaults).toBe("");
+		expect(dotenv.extension).toBe("");
+	});
+
+	it("should handle CLI priority when both env and argv are set", () => {
+		// Set environment variables
+		process.env.DOTENV_CONFIG_DEBUG = "false";
+		process.env.DOTENV_CONFIG_DEPTH = "10";
+		process.env.DOTENV_CONFIG_OVERRIDE = "true";
+
+		// Set argv that should override env vars
+		process.argv = [
+			"node",
+			"script.js",
+			"dotenv_config_debug=true",
+			"dotenv_config_depth=5",
+			// Note: not setting override, so env var should be used
+		];
+
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.debug).toBe(true); // argv wins
+		expect(dotenv.depth).toBe(5); // argv wins
+		expect(dotenv.override).toBe(true); // env var used since argv not set
+	});
+
+	it("should handle complex JSON in CLI arguments", () => {
+		// Mock console.error to suppress expected debug output
+		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+		process.argv = [
+			"node",
+			"script.js",
+			'dotenv_config_priorities={"custom.env": 100, "other.env": 50}',
+		];
+
+		expect(() => runCli(load)).not.toThrow();
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.priorities["custom.env"]).toBe(100);
+		expect(dotenv.priorities["other.env"]).toBe(50);
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it("should handle malformed JSON in CLI arguments gracefully", () => {
+		jest.spyOn(console, "error").mockImplementationOnce(() => {});
+
+		process.argv = ["node", "script.js", 'dotenv_config_priorities={"malformed": json}'];
+
+		expect(() => runCli(load)).not.toThrow();
+		const dotenv = runCli(load) as Dotenv;
+		// Should use default priorities when JSON parsing fails
+		expect(dotenv.priorities[".env"]).toBe(1);
+	});
+
+	it("should handle regex special characters in CLI arguments", () => {
+		// Mock console.error to suppress expected debug output
+		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+		process.argv = [
+			"node",
+			"script.js",
+			"dotenv_config_path=/path/with[brackets]/.env",
+			"dotenv_config_extension=server.test",
+		];
+
+		expect(() => runCli(load)).not.toThrow();
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.path).toBe("/path/with[brackets]/.env");
+		expect(dotenv.extension).toBe("server.test");
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it("should handle extremely long CLI arguments", () => {
+		// Mock console.error to suppress expected debug output
+		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+		const longPath = "/very/long/path/" + "directory/".repeat(100) + ".env";
+		process.argv = ["node", "script.js", `dotenv_config_path=${longPath}`];
+
+		expect(() => runCli(load)).not.toThrow();
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.path).toBe(longPath);
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it("should handle CLI arguments with unicode characters", () => {
+		// Mock console.error to suppress expected debug output
+		const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+		process.argv = [
+			"node",
+			"script.js",
+			"dotenv_config_path=/路径/файл/.env",
+			"dotenv_config_extension=тест",
+		];
+
+		expect(() => runCli(load)).not.toThrow();
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.path).toBe("/路径/файл/.env");
+		expect(dotenv.extension).toBe("тест");
+
+		consoleErrorSpy.mockRestore();
+	});
+
+	it("should handle duplicate CLI arguments (last one wins)", () => {
+		process.argv = [
+			"node",
+			"script.js",
+			"dotenv_config_debug=false",
+			"dotenv_config_depth=1",
+			"dotenv_config_debug=true", // This should win
+			"dotenv_config_depth=3", // This should win
+		];
+
+		const dotenv = runCli(load) as Dotenv;
+		expect(dotenv.debug).toBe(true);
+		expect(dotenv.depth).toBe(3);
+	});
 });
