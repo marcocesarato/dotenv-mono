@@ -4,7 +4,7 @@ import mockFs from "mock-fs";
 /**
  * Generic object.
  */
-type GenericObject<T = any> = {[key: string]: T};
+type GenericObject<T = unknown> = {[key: string]: T};
 
 describe("Dotenv Mono", () => {
 	let instance: Dotenv;

@@ -5,7 +5,7 @@ import {DotenvConfig} from "./index";
 /**
  * Generic object.
  */
-type GenericObject<T = any> = {[key: string]: T};
+type GenericObject<T = unknown> = {[key: string]: T};
 
 /**
  * Configuration option types.
@@ -51,7 +51,7 @@ class ParseError extends Error {
  * @param type - value type
  * @returns parsed option
  */
-export function parseOption(option: string | undefined, type: OptionType): any {
+export function parseOption(option: string | undefined, type: OptionType): unknown {
 	// Undefined
 	if (option === undefined || option === null) return undefined;
 	// Number
@@ -96,7 +96,7 @@ export function parseOption(option: string | undefined, type: OptionType): any {
  * Run CLI Dotenv runners.
  * @param runner
  */
-export function runCli(runner: Function): any {
+export function runCli(runner: (config: DotenvConfig) => unknown): unknown {
 	// Empty options
 	const options: GenericObject = {};
 	// Environment configuration
@@ -118,7 +118,7 @@ export function runCli(runner: Function): any {
 			opts[option] = parseOption(match, DotenvOptionsType[option]);
 		}
 		return opts;
-	}, {} as any) as DotenvConfig;
+	}, {} as GenericObject) as DotenvConfig;
 	// Run command
 	return runner({...options, ...cliOptions});
 }

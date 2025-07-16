@@ -8,7 +8,7 @@ import dotenvExpand from "dotenv-expand";
  * Environment variables list
  * @example `{ EXAMPLE: "1", EXAMPLE_2: "2" }`
  */
-export type DotenvData = Record<string, any>;
+export type DotenvData = Record<string, string | undefined>;
 
 /**
  * Criteria of the filename priority to load as dotenv file
@@ -489,7 +489,10 @@ export class Dotenv {
 
 		let hasAppended = false;
 		const data = Object.keys(changes).reduce((result: string, variable: string) => {
-			const value = changes[variable]
+			const rawValue = changes[variable];
+			if (rawValue == null) return result;
+
+			const value = String(rawValue)
 				.replace(breakPattern, breakReplacement)
 				.replace(returnPattern, returnReplacement)
 				.trim();
