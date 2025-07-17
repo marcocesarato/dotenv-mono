@@ -270,6 +270,51 @@ $ DOTENV_CONFIG_<OPTION>=value node -r dotenv-mono/load your_script.js
 $ DOTENV_CONFIG_ENCODING=latin1 DOTENV_CONFIG_DEBUG=true node -r dotenv-mono/load your_script.js dotenv_config_path=/custom/path/to/.env
 ```
 
+### CLI
+
+You can use `dotenv-mono` as a command-line tool to run commands with environment variables loaded from your `.env` files. This is similar to `dotenv-cli` but with all the enhanced features of `dotenv-mono`.
+
+```bash
+# Basic usage - load .env and run a command
+dotenv-mono -- node your_script.js
+
+# Load specific .env file
+dotenv-mono -e .env.production -- node your_script.js
+
+# Load multiple .env files
+dotenv-mono -e .env.local -e .env.production -- node your_script.js
+
+# Set additional variables
+dotenv-mono -v NODE_ENV=production -v DEBUG=true -- node your_script.js
+
+# Print a variable value
+dotenv-mono -p NODE_ENV
+
+# Debug mode - see what files would be loaded
+dotenv-mono --debug -e .env.production
+
+# Use all dotenv-mono features
+dotenv-mono --cwd /path/to/project --extension server --depth 3 -- node server.js
+```
+
+#### CLI Options
+
+| Option                | Description                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------ |
+| `--help`              | Print help message                                                                               |
+| `--debug`             | Output the files that would be processed but don't actually parse them or run the command        |
+| `-e <path>`           | Parse the file `<path>` as a `.env` file and add variables to the environment (multiple allowed) |
+| `-v <name>=<value>`   | Put variable `<name>` into environment using `<value>` (multiple allowed)                        |
+| `-p <variable>`       | Print value of `<variable>` to the console                                                       |
+| `--no-expand`         | Skip variable expansion                                                                          |
+| `--override`          | Override system variables                                                                        |
+| `--cwd <path>`        | Specify the current working directory                                                            |
+| `--depth <number>`    | Specify the max depth to reach when finding up the folder tree                                   |
+| `--encoding <enc>`    | Specify the encoding of your file containing environment variables                               |
+| `--extension <ext>`   | Specify to load specific dotenv file used only on specific apps/packages                         |
+| `--defaults <file>`   | Specify the defaults dotenv filename                                                             |
+| `--priorities <json>` | Specify the criteria of the filename priority to load as dotenv file                             |
+
 ## 💡 Methods
 
 ### Config

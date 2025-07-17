@@ -1,5 +1,5 @@
 import Dotenv, {dotenvLoad, dotenvConfig, load, config, DotenvMatcher, DotenvData} from "./index";
-import {runCli} from "./cli";
+import {runNodeCli} from "./node-cli";
 import mockFs from "mock-fs";
 import fs from "fs";
 import path from "path";
@@ -1123,7 +1123,7 @@ describe("Dotenv Mono", () => {
 		process.env.DOTENV_CONFIG_DEBUG = "true";
 
 		// Use the CLI functionality
-		const dotenv = runCli(load) as Dotenv;
+		const dotenv = runNodeCli(load) as Dotenv;
 		expect(dotenv.debug).toBe(true);
 		expect(dotenv.path).toBe("/root/.env");
 

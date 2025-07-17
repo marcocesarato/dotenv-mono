@@ -1,8 +1,8 @@
 import {load} from "./index";
-import {runCli} from "./cli";
+import {runNodeCli} from "./node-cli";
 
 (function () {
-	runCli(load);
+	runNodeCli(load);
 })();
 
 export {};
