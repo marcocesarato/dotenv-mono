@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.17...v1.4.0) (2025-07-17)
+
+### Features
+
+- CLI implementation and enhance command-line features ([6e77d1d](https://github.com/marcocesarato/dotenv-mono/commit/6e77d1d829a526de67a13412863f891ce9e4fee0))
+
 ### [1.3.17](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.14...v1.3.17) (2025-07-16)
 
 - Changed license to BSD-2-Clause
