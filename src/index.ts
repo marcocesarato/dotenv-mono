@@ -361,6 +361,7 @@ export class Dotenv {
 				debug: this.debug,
 				encoding: this.encoding,
 				override: !defaults && this.override,
+				quiet: true,
 			});
 			if (this.expand) config = dotenvExpand.expand(config);
 			this.mergeDotenvConfig(config);
