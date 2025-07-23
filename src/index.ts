@@ -363,6 +363,7 @@ export class Dotenv {
 						debug: this.debug,
 						encoding: this.encoding,
 						override: !defaults && this.override,
+						quiet: true,
 					})
 				: {
 						parsed: this.parse(plain),
