@@ -8,7 +8,7 @@ import dotenvExpand from "dotenv-expand";
  * Environment variables list
  * @example `{ EXAMPLE: "1", EXAMPLE_2: "2" }`
  */
-export type DotenvData = Record<string, any>;
+export type DotenvData = Record<string, string | undefined>;
 
 /**
  * Criteria of the filename priority to load as dotenv file
@@ -355,18 +355,29 @@ export class Dotenv {
 		defaults: boolean = false,
 	): void {
 		if (!file || !fs.existsSync(file)) return;
-		if (loadOnProcess) {
-			let config = dotenv.config({
-				path: file,
-				debug: this.debug,
-				encoding: this.encoding,
-				override: !defaults && this.override,
-				quiet: true,
-			});
-			if (this.expand) config = dotenvExpand.expand(config);
+		try {
+			const plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
+			const config = loadOnProcess
+				? dotenv.config({
+						path: file,
+						debug: this.debug,
+						encoding: this.encoding,
+						override: !defaults && this.override,
+            quiet: true,
+					})
+				: {
+						parsed: this.parse(plain),
+						processEnv: {},
+					};
+
+			if (this.expand) dotenvExpand.expand(config);
 			this.mergeDotenvConfig(config);
+			if (!defaults) this.plain = plain;
+		} catch (error) {
+			if (this.debug) {
+				console.error(`Error loading dotenv file: ${file}`, error);
+			}
 		}
-		if (!defaults) this.plain = fs.readFileSync(file, {encoding: this.encoding, flag: "r"});
 	}
 
 	/**
@@ -401,14 +412,13 @@ export class Dotenv {
 		let directory = path.resolve(this.cwd);
 		const {root} = path.parse(directory);
 		let depth = 0;
-		let match = false;
 		while (depth < this.depth) {
 			depth++;
 			const {foundPath, foundDotenv} = matcher(dotenv, directory);
 			dotenv = foundDotenv;
-			if (match) break;
-			if (foundPath) match = true;
-			if (directory === root) break;
+			if (foundPath || directory === root) {
+				break;
+			}
 			directory = path.dirname(directory);
 		}
 		return dotenv;
@@ -422,10 +432,11 @@ export class Dotenv {
 	 * @returns paths found
 	 */
 	private dotenvMatcher(dotenv: string | null | undefined, cwd: string): DotenvMatcherResult {
-		const priority = -1;
+		let priority = -1;
 		Object.keys(this.priorities).forEach((fileName) => {
 			if (this.priorities[fileName] > priority && fs.existsSync(path.join(cwd, fileName))) {
 				dotenv = path.join(cwd, fileName);
+				priority = this.priorities[fileName];
 			}
 		});
 		const foundPath = dotenv != null ? cwd : null;
@@ -485,7 +496,10 @@ export class Dotenv {
 
 		let hasAppended = false;
 		const data = Object.keys(changes).reduce((result: string, variable: string) => {
-			const value = changes[variable]
+			const rawValue = changes[variable];
+			if (rawValue == null) return result;
+
+			const value = String(rawValue)
 				.replace(breakPattern, breakReplacement)
 				.replace(returnPattern, returnReplacement)
 				.trim();
@@ -518,6 +532,13 @@ export class Dotenv {
 			encoding: this.encoding,
 		});
 		this.plain = data;
+		// Update env with new changes
+		Object.keys(changes).forEach((key) => {
+			const value = changes[key];
+			if (value !== undefined && value !== null) {
+				this.env[key] = String(value);
+			}
+		});
 		return this;
 	}
 

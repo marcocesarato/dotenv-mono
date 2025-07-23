@@ -1,122 +1,216 @@
-import {DotenvConfig} from "./index";
+#!/usr/bin/env node
 
-/**
- * Generic object.
- */
-type GenericObject<T = any> = {[key: string]: T};
+import spawn from "cross-spawn";
+import minimist from "minimist";
+import {dotenvLoad, DotenvConfig} from "./index";
 
-/**
- * Configuration option types.
- */
-export enum OptionType {
-	boolean,
-	number,
-	string,
-	array,
-	object,
-	mapOfNumbers,
-}
+const HELP_OPTIONS = [
+	{flag: "--help", desc: "print help"},
+	{
+		flag: "--debug",
+		desc: "output the files that would be processed but don't actually parse them or run the command",
+	},
+	{
+		flag: "-e <path>",
+		desc: "parses the file <path> as a .env file and adds the variables to the environment",
+	},
+	{flag: "-e <path>", desc: "multiple -e flags are allowed"},
+	{flag: "-v <n>=<value>", desc: "put variable <n> into environment using value <value>"},
+	{flag: "-v <n>=<value>", desc: "multiple -v flags are allowed"},
+	{
+		flag: "-p <variable>",
+		desc: "print value of <variable> to the console. If you specify this, you do not have to specify a command",
+	},
+	{flag: "--no-expand", desc: "skip variable expansion"},
+	{flag: "--override", desc: "override system variables"},
+	{flag: "--cwd <path>", desc: "specify the current working directory"},
+	{
+		flag: "--depth <number>",
+		desc: "specify the max depth to reach finding up the folder from the children directory",
+	},
+	{
+		flag: "--encoding <enc>",
+		desc: "specify the encoding of your file containing environment variables",
+	},
+	{
+		flag: "--extension <ext>",
+		desc: "specify to load specific dotenv file used only on specific apps/packages",
+	},
+	{flag: "--defaults <file>", desc: "specify the defaults dotenv filename"},
+	{
+		flag: "--priorities <json>",
+		desc: "specify the criteria of the filename priority to load as dotenv file",
+	},
+	{
+		flag: "command",
+		desc: "command is the actual command you want to run. Best practice is to precede this command with -- . Everything after -- is considered to be your command. So any flags will not be parsed by this tool but be passed to your command. If you do not do it, this tool will strip those flags",
+	},
+];
 
-/**
- * List of all Dotenv configuration options type.
- */
-export const DotenvOptionsType: GenericObject<OptionType> = {
-	cwd: OptionType.string,
-	debug: OptionType.boolean,
-	defaults: OptionType.string,
-	depth: OptionType.number,
-	encoding: OptionType.string,
-	expand: OptionType.boolean,
-	extension: OptionType.string,
-	path: OptionType.string,
-	override: OptionType.boolean,
-	priorities: OptionType.mapOfNumbers,
-};
-
-/**
- * Parse error.
- */
-class ParseError extends Error {
-	constructor(message: string, option: string = "") {
-		super(`${message} Parsed value: ${option}`);
-		this.name = "ParseError";
-	}
-}
-
-/**
- * Parse CLI parameter type.
- * @param option - value to parse
- * @param type - value type
- * @returns parsed option
- */
-export function parseOption(option: string | undefined, type: OptionType): any {
-	// Undefined
-	if (option === undefined || option === null) return undefined;
-	// Number
-	if (type === OptionType.number) return Number(option);
-	// Boolean
-	if (type === OptionType.boolean) return option === "true";
-	// Objects
-	if (
-		type === OptionType.array ||
-		type === OptionType.object ||
-		type === OptionType.mapOfNumbers
-	) {
-		try {
-			const result = JSON.parse(option);
-			// Check if is an object
-			if (typeof result !== "object") {
-				throw new ParseError(`The value is not an object.`, option);
-			}
-			if (type === OptionType.array) {
-				// Array
-				return Object.values(result);
-			}
-			// Check if is a map of numbers, null and undefined are allowed
-			if (
-				type === OptionType.mapOfNumbers &&
-				Object.values(result).some((v) => v && typeof v !== "number")
-			) {
-				throw new ParseError(`The value is not an map of numbers.`, option);
-			}
-			// Object
-			return result;
-		} catch (e) {
-			console.error(`Invalid option value!\r\n`, e);
-			return undefined;
+function printHelp(): void {
+	console.log(
+		"Usage: dotenv-mono [--help] [--debug] [-e <path>] [-v <n>=<value>] [-p <variable>] [--no-expand] [--override] [-- command]",
+	);
+	for (const opt of HELP_OPTIONS) {
+		// For the 'command' line, print the description on a new line for clarity
+		if (opt.flag === "command") {
+			console.log(`  ${opt.flag.padEnd(21)}${opt.desc}`);
+		} else {
+			console.log(`  ${opt.flag.padEnd(21)}${opt.desc}`);
 		}
 	}
-	// String
-	return option;
 }
 
-/**
- * Run CLI Dotenv runners.
- * @param runner
- */
-export function runCli(runner: Function): any {
-	// Empty options
-	const options: GenericObject = {};
-	// Environment configuration
-	Object.keys(DotenvOptionsType).forEach((option) => {
-		const envName = "DOTENV_CONFIG_" + option.toUpperCase();
-		if (process.env[envName] != null) {
-			options[option] = parseOption(process.env[envName], DotenvOptionsType[option]);
+function validateCmdVariable(param: string): [string, string] {
+	const match = param.match(/^(\w+)=([\s\S]+)$/m);
+	if (!match) {
+		console.error(
+			`Invalid variable name. Expected variable in format '-v variable=value', but got: \`-v ${param}\`.`,
+		);
+		process.exit(1);
+	}
+	const [, key, val] = match;
+	return [key, val];
+}
+
+function main(): void {
+	const argv = minimist(process.argv.slice(2));
+
+	if (argv.help) {
+		printHelp();
+		process.exit(0);
+	}
+
+	// Build dotenv-mono configuration from CLI arguments
+	const config: DotenvConfig = {};
+
+	if (argv.cwd) config.cwd = argv.cwd;
+	if (argv.debug !== undefined) config.debug = argv.debug;
+	if (argv.defaults) config.defaults = argv.defaults;
+	if (argv.depth !== undefined) config.depth = Number(argv.depth);
+	if (argv.encoding) config.encoding = argv.encoding;
+	if (argv.override !== undefined) config.override = argv.override;
+	if (argv.extension) config.extension = argv.extension;
+
+	// Handle expand flag (--no-expand sets it to false)
+	if (argv["no-expand"] !== undefined) {
+		config.expand = false;
+	} else if (argv.expand !== undefined) {
+		config.expand = argv.expand;
+	}
+
+	// Handle priorities (JSON string)
+	if (argv.priorities) {
+		try {
+			config.priorities = JSON.parse(argv.priorities);
+		} catch (error) {
+			console.error("Invalid priorities JSON:", error);
+			process.exit(1);
+		}
+	}
+
+	// Handle multiple -e flags for custom paths
+	const paths: string[] = [];
+	if (argv.e) {
+		if (typeof argv.e === "string") {
+			paths.push(argv.e);
+		} else {
+			paths.push(...argv.e);
+		}
+	}
+
+	// Handle multiple -v flags for variables
+	const variables: [string, string][] = [];
+	if (argv.v) {
+		if (typeof argv.v === "string") {
+			variables.push(validateCmdVariable(argv.v));
+		} else {
+			variables.push(...argv.v.map(validateCmdVariable));
+		}
+	}
+
+	// If debug mode, just show what would be processed
+	if (argv.debug) {
+		console.log("Configuration:", config);
+		console.log("Custom paths:", paths);
+		console.log("Variables:", variables);
+		process.exit(0);
+	}
+
+	// Load dotenv files
+	if (paths.length > 0) {
+		// Load each specified path
+		paths.forEach((path) => {
+			const pathConfig = {...config, path};
+			try {
+				dotenvLoad(pathConfig);
+			} catch (error) {
+				console.error(`Error loading dotenv file: ${path}`, error);
+				process.exit(1);
+			}
+		});
+	} else {
+		// Use default dotenv-mono behavior
+		try {
+			dotenvLoad(config);
+		} catch (error) {
+			console.error("Error loading dotenv files:", error);
+			process.exit(1);
+		}
+	}
+
+	// Apply command-line variables (these override dotenv variables)
+	variables.forEach(([key, value]) => {
+		process.env[key] = value;
+	});
+
+	// Handle print variable flag
+	if (argv.p) {
+		const value = process.env[argv.p];
+		console.log(value != null ? value : "");
+		process.exit(0);
+	}
+
+	// Get the command to run
+	const command = argv._[0];
+	if (!command) {
+		printHelp();
+		process.exit(1);
+	}
+
+	// Spawn the command with the loaded environment
+	const child = spawn(command, argv._.slice(1), {
+		stdio: "inherit",
+		env: process.env,
+	}).on("exit", function (exitCode, signal) {
+		if (typeof exitCode === "number") {
+			process.exit(exitCode);
+		} else {
+			process.kill(process.pid, signal as NodeJS.Signals);
 		}
 	});
-	// CLI Parameter configuration parser
-	const args: string[] = process.argv;
-	const keys: string = Object.keys(DotenvOptionsType).join("|");
-	const re = new RegExp(`^dotenv_config_(${keys})=(.*?)$`, "g");
-	const cliOptions = args.reduce(function (opts, cur) {
-		const matches = cur.match(re);
-		if (matches) {
-			const option = String(matches[1]).trim();
-			const match = String(matches[2]).trim();
-			opts[option] = parseOption(match, DotenvOptionsType[option]);
-		}
-		return opts;
-	}, {} as any) as DotenvConfig;
-	// Run command
-	return runner({...options, ...cliOptions});
+
+	// Forward signals to child process
+	const signals: NodeJS.Signals[] = [
+		"SIGINT",
+		"SIGTERM",
+		"SIGPIPE",
+		"SIGHUP",
+		"SIGBREAK",
+		"SIGWINCH",
+		"SIGUSR1",
+		"SIGUSR2",
+	];
+	signals.forEach((signal) => {
+		process.on(signal, function () {
+			child.kill(signal);
+		});
+	});
 }
+
+// Only run if this file is executed directly
+if (require.main === module) {
+	main();
+}
+
+export {main};
