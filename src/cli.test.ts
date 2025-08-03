@@ -148,4 +148,107 @@ describe("CLI Main Function", () => {
 		expect(() => mainCli()).toThrow("Process exit called with code: 1");
 		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("Usage: dotenv-mono"));
 	});
+
+	it("should handle --quiet flag", () => {
+		process.argv = ["node", "cli.js", "--quiet", "--debug"];
+
+		expect(() => mainCli()).toThrow("Process exit called with code: 0");
+		expect(consoleLogSpy).toHaveBeenCalledWith(
+			"Configuration:",
+			expect.objectContaining({quiet: true}),
+		);
+	});
+
+	it("should handle --quiet flag with command execution", () => {
+		mockFs({
+			"/test": {
+				".env": "CLI_QUIET_TEST=quiet_value",
+			},
+		});
+
+		process.argv = ["node", "cli.js", "--quiet", "--cwd", "/test", "echo", "test"];
+
+		// Mock spawn to avoid actually executing commands in test environment
+		const mockSpawn = jest.fn().mockReturnValue({
+			on: jest.fn().mockImplementation((event, callback) => {
+				if (event === "exit") {
+					setTimeout(() => callback(0), 0); // Simulate successful command execution
+				}
+				return {
+					kill: jest.fn(),
+				};
+			}),
+			kill: jest.fn(),
+		});
+
+		// Mock cross-spawn
+		jest.doMock("cross-spawn", () => mockSpawn);
+
+		// The command should execute without throwing since we mock the child process
+		expect(() => mainCli()).not.toThrow();
+	});
+
+	it("should handle --quiet with -e flag", () => {
+		process.argv = ["node", "cli.js", "--quiet", "-e", "/test/.env", "--debug"];
+
+		expect(() => mainCli()).toThrow("Process exit called with code: 0");
+		expect(consoleLogSpy).toHaveBeenCalledWith(
+			"Configuration:",
+			expect.objectContaining({quiet: true}),
+		);
+		expect(consoleLogSpy).toHaveBeenCalledWith("Custom paths:", ["/test/.env"]);
+	});
+
+	it("should handle --quiet with multiple flags", () => {
+		process.argv = [
+			"node",
+			"cli.js",
+			"--quiet",
+			"--override",
+			"--no-expand",
+			"--depth",
+			"5",
+			"--debug",
+		];
+
+		expect(() => mainCli()).toThrow("Process exit called with code: 0");
+		expect(consoleLogSpy).toHaveBeenCalledWith(
+			"Configuration:",
+			expect.objectContaining({
+				quiet: true,
+				override: true,
+				expand: false,
+				depth: 5,
+			}),
+		);
+	});
+
+	it("should handle --quiet with -v variables", () => {
+		process.argv = ["node", "cli.js", "--quiet", "-v", "QUIET_VAR=quiet_test", "--debug"];
+
+		expect(() => mainCli()).toThrow("Process exit called with code: 0");
+		expect(consoleLogSpy).toHaveBeenCalledWith(
+			"Configuration:",
+			expect.objectContaining({quiet: true}),
+		);
+		expect(consoleLogSpy).toHaveBeenCalledWith("Variables:", [["QUIET_VAR", "quiet_test"]]);
+	});
+
+	it("should handle --quiet with -p print variable", () => {
+		process.env.QUIET_PRINT_TEST = "quiet_print_value";
+		process.argv = ["node", "cli.js", "--quiet", "-p", "QUIET_PRINT_TEST"];
+
+		expect(() => mainCli()).toThrow("Process exit called with code: 0");
+		expect(consoleLogSpy).toHaveBeenCalledWith("quiet_print_value");
+	});
+
+	it("should include --quiet in help output", () => {
+		process.argv = ["node", "cli.js", "--help"];
+
+		expect(() => mainCli()).toThrow("Process exit called with code: 0");
+		expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining("--quiet"));
+		expect(consoleLogSpy).toHaveBeenCalledWith(
+			expect.stringContaining("suppress console output from dotenv"),
+		);
+	});
 });

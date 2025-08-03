@@ -212,6 +212,13 @@ load({path: "../../configs/.env"});
 load({expand: false});
 ```
 
+### Load without quiet mode
+
+```js
+// Suppress console output from dotenv
+load({quiet: false});
+```
+
 ### Change default filename
 
 ```js
@@ -304,10 +311,11 @@ dotenv-mono --cwd /path/to/project --extension server --depth 3 -- node server.j
 | `--help`              | Print help message                                                                               |
 | `--debug`             | Output the files that would be processed but don't actually parse them or run the command        |
 | `-e <path>`           | Parse the file `<path>` as a `.env` file and add variables to the environment (multiple allowed) |
-| `-v <name>=<value>`   | Put variable `<name>` into environment using `<value>` (multiple allowed)                        |
+| `-v <n>=<value>`      | Put variable `<n>` into environment using `<value>` (multiple allowed)                           |
 | `-p <variable>`       | Print value of `<variable>` to the console                                                       |
 | `--no-expand`         | Skip variable expansion                                                                          |
 | `--override`          | Override system variables                                                                        |
+| `--quiet`             | Suppress console output from dotenv                                                              |
 | `--cwd <path>`        | Specify the current working directory                                                            |
 | `--depth <number>`    | Specify the max depth to reach when finding up the folder tree                                   |
 | `--encoding <enc>`    | Specify the encoding of your file containing environment variables                               |
@@ -331,6 +339,7 @@ dotenv-mono --cwd /path/to/project --extension server --depth 3 -- node server.j
 | `override`   | Override any environment variables that have already been set on your machine with values from your `.env` file | `false`                       |
 | `path`       | Specify a custom path if your file containing environment variables is located elsewhere                        |                               |
 | `priorities` | Specify the criteria of the filename priority to load as dotenv file                                            | See [Priorities](#priorities) |
+| `quiet`      | Turn on/off quiet mode to suppress console output from dotenv                                                   | `true`                        |
 
 ### Dotenv Methods
 

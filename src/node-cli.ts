@@ -39,6 +39,7 @@ export const DotenvOptionsType: GenericObject<OptionType> = {
 	path: OptionType.string,
 	override: OptionType.boolean,
 	priorities: OptionType.mapOfNumbers,
+	quiet: OptionType.boolean,
 };
 
 /**

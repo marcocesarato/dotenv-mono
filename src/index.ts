@@ -94,6 +94,12 @@ export type DotenvConfig = {
 	 * @example `require('dotenv-mono').load({ priorities: { '.env.overwrite': 100 } })`
 	 */
 	priorities?: DotenvPriorities;
+	/**
+	 * Turn on/off quiet mode to suppress console output.
+	 * @defaultValue `false`
+	 * @example `require('dotenv-mono').load({ quiet: true })`
+	 */
+	quiet?: boolean;
 };
 
 /**
@@ -116,11 +122,13 @@ export class Dotenv {
 	#_override: boolean = false;
 	#_path: string = "";
 	#_priorities: DotenvPriorities = {};
+	#_quiet: boolean = true;
 
 	/**
 	 * Constructor.
 	 * @param cwd - current Working Directory
 	 * @param debug - turn on/off debugging
+	 * @param defaults - defaults dotenv filename
 	 * @param depth - max walking up depth
 	 * @param encoding - file encoding
 	 * @param expand - turn on/off dotenv-expand plugin
@@ -128,6 +136,7 @@ export class Dotenv {
 	 * @param override - override process variables
 	 * @param path - dotenv path
 	 * @param priorities - priorities
+	 * @param quiet - turn on/off quiet mode
 	 */
 	constructor({
 		cwd,
@@ -140,6 +149,7 @@ export class Dotenv {
 		override,
 		path,
 		priorities,
+		quiet,
 	}: DotenvConfig = {}) {
 		this.cwd = cwd;
 		this.debug = debug;
@@ -151,6 +161,7 @@ export class Dotenv {
 		this.override = override;
 		this.path = path;
 		this.priorities = priorities;
+		this.quiet = quiet;
 		// Auto-bind matchers
 		this.dotenvDefaultsMatcher = this.dotenvDefaultsMatcher.bind(this);
 		this.dotenvMatcher = this.dotenvMatcher.bind(this);
@@ -316,6 +327,21 @@ export class Dotenv {
 	}
 
 	/**
+	 * Get quiet mode.
+	 */
+	public get quiet(): boolean {
+		return this.#_quiet;
+	}
+
+	/**
+	 * Set quiet mode.
+	 * @param value
+	 */
+	public set quiet(value: boolean | undefined) {
+		if (value != null) this.#_quiet = value;
+	}
+
+	/**
 	 * Parses a string or buffer in the .env file format into an object.
 	 * @see https://docs.dotenv.org
 	 * @returns an object with keys and values based on `src`. example: `{ DB_HOST : 'localhost' }`
@@ -363,6 +389,7 @@ export class Dotenv {
 						debug: this.debug,
 						encoding: this.encoding,
 						override: !defaults && this.override,
+						quiet: this.quiet,
 					})
 				: {
 						parsed: this.parse(plain),

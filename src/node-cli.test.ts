@@ -422,4 +422,26 @@ describe("Parse Option", () => {
 		expect(dotenv.debug).toBe(true);
 		expect(dotenv.depth).toBe(3);
 	});
+
+	it("should handle quiet option in environmental options", () => {
+		process.env.DOTENV_CONFIG_QUIET = "true";
+		const dotenv = runNodeCli(load) as Dotenv;
+		expect(dotenv.quiet).toBe(true);
+
+		// Test with false
+		process.env.DOTENV_CONFIG_QUIET = "false";
+		const dotenv2 = runNodeCli(load) as Dotenv;
+		expect(dotenv2.quiet).toBe(false);
+	});
+
+	it("should handle quiet option in argv options", () => {
+		process.argv = ["node", "script.js", "dotenv_config_quiet=true"];
+		const dotenv = runNodeCli(load) as Dotenv;
+		expect(dotenv.quiet).toBe(true);
+
+		// Test with false
+		process.argv = ["node", "script.js", "dotenv_config_quiet=false"];
+		const dotenv2 = runNodeCli(load) as Dotenv;
+		expect(dotenv2.quiet).toBe(false);
+	});
 });

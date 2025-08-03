@@ -23,6 +23,7 @@ const HELP_OPTIONS = [
 	},
 	{flag: "--no-expand", desc: "skip variable expansion"},
 	{flag: "--override", desc: "override system variables"},
+	{flag: "--quiet", desc: "suppress console output from dotenv"},
 	{flag: "--cwd <path>", desc: "specify the current working directory"},
 	{
 		flag: "--depth <number>",
@@ -49,7 +50,7 @@ const HELP_OPTIONS = [
 
 function printHelp(): void {
 	console.log(
-		"Usage: dotenv-mono [--help] [--debug] [-e <path>] [-v <n>=<value>] [-p <variable>] [--no-expand] [--override] [-- command]",
+		"Usage: dotenv-mono [--help] [--debug] [-e <path>] [-v <n>=<value>] [-p <variable>] [--no-expand] [--override] [-- command] [--quiet] [--cwd <path>] [--depth <number>] [--encoding <enc>] [--extension <ext>] [--defaults <file>] [--priorities <json>]\n",
 	);
 	for (const opt of HELP_OPTIONS) {
 		// For the 'command' line, print the description on a new line for clarity
@@ -91,6 +92,7 @@ function main(): void {
 	if (argv.encoding) config.encoding = argv.encoding;
 	if (argv.override !== undefined) config.override = argv.override;
 	if (argv.extension) config.extension = argv.extension;
+	if (argv.quiet !== undefined) config.quiet = argv.quiet;
 
 	// Handle expand flag (--no-expand sets it to false)
 	if (argv["no-expand"] !== undefined) {

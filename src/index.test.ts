@@ -1328,6 +1328,98 @@ EQUALS_IN_NAME=WITH=EQUALS=value
 		const unixInstance = new Dotenv({path: unixPath});
 		expect(unixInstance.path).toBe(unixPath);
 	});
+
+	it("should handle quiet mode", () => {
+		const quietInstance = new Dotenv({quiet: true});
+		expect(quietInstance.quiet).toBe(true);
+
+		quietInstance.quiet = false;
+		expect(quietInstance.quiet).toBe(false);
+
+		// Test with undefined (should not change current value)
+		const currentQuiet = quietInstance.quiet;
+		quietInstance.quiet = undefined;
+		expect(quietInstance.quiet).toBe(currentQuiet);
+	});
+
+	it("should pass quiet option to dotenv.config", () => {
+		mockFs({
+			"/quiet-test": {
+				".env": "QUIET_TEST=value",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/quiet-test");
+
+		// Test with quiet enabled
+		const quietInstance = new Dotenv({cwd: "/quiet-test", quiet: true});
+		expect(() => quietInstance.load()).not.toThrow();
+		expect(quietInstance.env.QUIET_TEST).toBe("value");
+		expect(quietInstance.quiet).toBe(true);
+
+		// Test with quiet disabled
+		const normalInstance = new Dotenv({cwd: "/quiet-test", quiet: false});
+		expect(() => normalInstance.load()).not.toThrow();
+		expect(normalInstance.env.QUIET_TEST).toBe("value");
+		expect(normalInstance.quiet).toBe(false);
+	});
+
+	it("should have quiet option default to true", () => {
+		const defaultInstance = new Dotenv();
+		expect(defaultInstance.quiet).toBe(true);
+	});
+
+	it("should handle quiet option in constructor", () => {
+		const quietInstance = new Dotenv({
+			quiet: true,
+			debug: false,
+			override: true,
+		});
+
+		expect(quietInstance.quiet).toBe(true);
+		expect(quietInstance.debug).toBe(false);
+		expect(quietInstance.override).toBe(true);
+	});
+
+	it("should handle quiet option with loadFile method", () => {
+		mockFs({
+			"/quiet-loadfile": {
+				".env": "LOADFILE_QUIET=test",
+			},
+		});
+
+		const instance = new Dotenv({path: "/quiet-loadfile/.env", quiet: true});
+		expect(() => instance.loadFile()).not.toThrow();
+		expect(instance.env.LOADFILE_QUIET).toBe("test");
+		expect(instance.quiet).toBe(true);
+	});
+
+	it("should work with dotenvLoad function and quiet option", () => {
+		mockFs({
+			"/function-quiet": {
+				".env": "FUNCTION_QUIET=value",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/function-quiet");
+
+		const dotenv = dotenvLoad({cwd: "/function-quiet", quiet: true});
+		expect(dotenv.env.FUNCTION_QUIET).toBe("value");
+		expect(dotenv.quiet).toBe(true);
+	});
+
+	it("should work with dotenvConfig function and quiet option", () => {
+		mockFs({
+			"/config-quiet": {
+				".env": "CONFIG_QUIET=value",
+			},
+		});
+
+		jest.spyOn(process, "cwd").mockReturnValue("/config-quiet");
+
+		const output = dotenvConfig({cwd: "/config-quiet", quiet: true});
+		expect(output.parsed?.CONFIG_QUIET).toBe("value");
+	});
 });
 
 function toStringArray(object: GenericObject): string[] {
