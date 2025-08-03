@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.4.0...v1.5.0) (2025-08-03)
+
+### Features
+
+- add quiet mode option to suppress console output ([693778c](https://github.com/marcocesarato/dotenv-mono/commit/693778cc2314069de80a3e353088ab38cb8fccaf)), closes [#150](https://github.com/marcocesarato/dotenv-mono/issues/150)
+
 ## [1.4.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.3.17...v1.4.0) (2025-07-17)
 
 ### Features
