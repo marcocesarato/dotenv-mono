@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.5.1](https://github.com/marcocesarato/dotenv-mono/compare/v1.5.0...v1.5.1) (2025-09-02)
+
+### Bug Fixes
+
+- add dotenv-mono to bin ([aca630b](https://github.com/marcocesarato/dotenv-mono/commit/aca630ba6cd58e711e4ef1bdb78c70c409453cdb)), closes [#152](https://github.com/marcocesarato/dotenv-mono/issues/152)
+
 ## [1.5.0](https://github.com/marcocesarato/dotenv-mono/compare/v1.4.0...v1.5.0) (2025-08-03)
 
 ### Features
